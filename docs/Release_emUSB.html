@@ -1,0 +1,1698 @@
+<!DOCTYPE html>
+<!-- V171020-2 -->
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>Release notes for emUSB-Device V3.52.2         </title>
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style type="text/css">
+    body {
+      margin: 0;
+      background-color: #4F5157;
+      color: #3B3D3F;
+      font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      font-size: 0.9rem;
+      line-height: 1.5;
+      min-width: 400px;
+    }
+
+    .header {
+      background: #2C5B9C;
+    }
+
+    .head {
+      color: #fff;
+      padding: 20px 30px;
+    }
+
+    .head h2 {
+      color: #fff;
+    }
+
+    .headh3 li,
+    .head h3 a,
+    .head a {
+      color: #fff;
+    }
+
+    .footer {
+      color: #4f5157;
+      background: #BFC3C6;
+      padding: 20px;
+      border-top: 1px solid #fff;
+      border-bottom: 1px solid #fff;
+    }
+
+    .footer h2 {
+      color: #bfc3c6;
+    }
+
+    .footer h3 li,
+    .footer h3 a,
+    .footer a {
+      color: #000;
+    }
+
+    .divider-global {
+      border-top: 2px solid #fff;
+      padding: 20px 30px;
+    }
+
+    h1 {
+      margin-bottom: 30px;
+      text-align: left;
+      font-size: 1.5em;
+      color: #fff;
+      border-bottom: 1px solid #fff;
+    }
+
+    h2 {
+      text-align: left;
+      font-size: 1.2em;
+      color: #002F5C;
+      text-decoration: underline;
+      display: inline-block;
+    }
+
+    h3 {
+      text-align: left;
+      font-size: 1.0em;
+    }
+
+    h3 li {
+      margin: 10px 0;
+    }
+
+    div.divider-global:nth-of-type(odd) {
+      background: #F2F2F2;
+    }
+
+    div.divider-global:nth-of-type(even) {
+      background: #F6F6F6;
+    }
+
+    .toolChain Table {
+      max-width: 1000px;
+    }
+
+    .toolChain Table th {
+      font-weight: 600;
+      text-align: left;
+      width: 12%;
+    }
+
+    #seggerLogo {
+      padding: 20px 30px;
+      display: inline-block;
+    }
+
+    .claim {
+      font-size: 20px;
+      display: inline-block;
+      color: #fff;
+      line-height: 115px;
+      vertical-align: top;
+    }
+
+    @media screen and (max-width: 600px) {
+      .claim {
+        display: none;
+      }
+    }
+
+    @media screen and (min-width: 600px) {
+      .claim {
+        font-size: 200%;
+      }
+    }
+
+    @media screen and (min-width: 1024px) {
+      .claim {
+        font-size: 300%;
+      }
+    }
+  </style>
+</head>
+
+<body class="en" id="top">
+  <main class="main-content" id="content">
+    <div class="header">
+      <div class="row">
+        <div id="seggerLogo"> <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="150px" height="75px" viewBox="110 27.5 150 75" style="enable-background:new 110 27.5 150 75;" xml:space="preserve">
+        <style type="text/css">
+
+	.st0{fill:#FFFFFF;}
+	.st1{fill:#005CA8;}
+	.st2{fill:#010000;}
+
+</style>
+        <g>
+          <g>
+            <path class="st0" d="M258,96.1c0,2.6-2,4.7-4.4,4.7H115.9c-2.4,0-4.4-2.1-4.4-4.7V33.7c0-2.6,2-4.7,4.4-4.7h137.7
+			c2.4,0,4.4,2.1,4.4,4.7"></path>
+            <path class="st2" d="M253.7,102.3H115.9c-3.3,0-5.9-2.8-5.9-6.2V33.7c0-3.5,2.6-6.2,5.9-6.2h137.7c3.3,0,5.9,2.8,5.9,6.2v62.4
+			C259.6,99.5,256.9,102.3,253.7,102.3z M115.9,30.6c-1.6,0-2.8,1.4-2.8,3.1v62.4c0,1.7,1.3,3.1,2.8,3.1h137.7
+			c1.6,0,2.8-1.4,2.8-3.1V33.7c0-1.7-1.3-3.1-2.8-3.1H115.9z"></path>
+          </g>
+          <polygon class="st1" points="117.8,52.4 127.1,64.9 117.8,77.3 	"></polygon>
+          <g>
+            <path class="st1" d="M131.6,41.3l15.6,20.3v0.1c0.4,0.5,1,1,1.7,1h99.7c1.2,0,2.2-1.1,2.2-2.3c0-1.2-1-2.3-2.2-2.3H150l-14.9-19.4
+			l0,0c-0.4-0.5-1-0.9-1.7-0.9c-1.2,0-2.2,1-2.2,2.2C131.2,40.4,131.4,40.9,131.6,41.3L131.6,41.3z"></path>
+            <path class="st1" d="M140.4,66.3c0.3-0.4,0.5-0.9,0.5-1.4c0-0.5-0.2-1-0.5-1.4l-18.6-24.9l0,0c-0.4-0.5-1-0.9-1.7-0.9
+			c-1.2,0-2.2,1-2.2,2.2c0,0.5,0.2,1,0.5,1.4l17.6,23.5l-17.7,23.5c-0.3,0.4-0.5,0.9-0.5,1.4c0,1.2,1,2.2,2.2,2.2
+			c0.7,0,1.3-0.3,1.7-0.9l0,0L140.4,66.3z"></path>
+            <path class="st1" d="M248.7,67.2h-99.8c-0.7,0-1.3,0.4-1.7,1v0.1l-15.6,20.3l0,0c-0.3,0.3-0.5,0.8-0.5,1.3c0,1.2,1,2.2,2.2,2.2
+			c0.7,0,1.3-0.3,1.7-0.9v0.1l15-19.4h98.7c1.2,0,2.2-1.1,2.2-2.3S249.9,67.2,248.7,67.2z"></path>
+          </g>
+          <path class="st2" d="M163,80.7c0,0.4-0.1,0.7-0.4,1c-0.3,0.2-0.7,0.3-1.2,0.3c-0.6,0-1.2-0.3-1.8-1c-0.2-0.2-0.3-0.3-0.3-0.3
+		c-0.3-0.3-0.7-0.5-1.2-0.7c-0.5-0.1-1-0.2-1.7-0.2c-0.9,0-1.6,0.2-2.1,0.5c-0.5,0.3-0.7,0.7-0.7,1.3c0,0.7,1,1.3,2.9,1.7
+		c0.5,0.1,0.9,0.2,1.1,0.2c1.2,0.2,2.1,0.5,2.7,0.6s1,0.3,1.5,0.5c0.7,0.3,1.2,0.8,1.6,1.3c0.3,0.6,0.5,1.2,0.5,2
+		c0,1.4-0.6,2.6-1.8,3.4c-1.2,0.9-2.8,1.3-4.9,1.3c-1.2,0-2.1-0.1-2.9-0.3c-0.8-0.2-1.6-0.5-2.4-1c-0.5-0.3-0.9-0.7-1.2-1.2
+		s-0.5-0.9-0.5-1.3c0-0.4,0.1-0.7,0.4-1c0.3-0.3,0.7-0.4,1.2-0.4c0.6,0,1.2,0.3,1.7,1c0.2,0.3,0.3,0.5,0.5,0.6
+		c0.3,0.3,0.7,0.6,1.3,0.8c0.5,0.2,1.1,0.2,1.8,0.2c1.1,0,1.9-0.2,2.5-0.5c0.6-0.3,0.9-0.8,0.9-1.4c0-0.9-1.4-1.6-4.3-2.1
+		c-0.1,0-0.2-0.1-0.2-0.1c-2.2-0.4-3.7-1-4.5-1.6c-0.8-0.6-1.2-1.6-1.2-2.8c0-1.4,0.6-2.5,1.7-3.2c1.1-0.7,2.8-1.2,4.8-1.2
+		c1,0,1.8,0.1,2.6,0.3c0.7,0.2,1.5,0.5,2.1,0.9c0.5,0.3,0.9,0.6,1.2,1C162.8,79.9,163,80.3,163,80.7z"></path>
+          <path class="st2" d="M177.8,89.6c0.6,0,1.1,0.1,1.4,0.3c0.3,0.2,0.5,0.6,0.5,1s-0.2,0.7-0.5,1c-0.3,0.2-0.8,0.3-1.4,0.3h-9
+		c-0.8,0-1.4-0.2-1.7-0.5c-0.3-0.3-0.5-0.9-0.5-1.8V80c0-0.9,0.1-1.5,0.5-1.8c0.3-0.3,0.9-0.5,1.7-0.5h8.6c0.6,0,1.1,0.1,1.4,0.3
+		c0.3,0.2,0.5,0.5,0.5,1c0,0.4-0.2,0.7-0.5,0.9c-0.3,0.2-0.8,0.3-1.4,0.3h-7.2v3.1h6.5c0.6,0,1.1,0.1,1.4,0.3c0.3,0.2,0.5,0.5,0.5,1
+		c0,0.4-0.2,0.7-0.5,0.9c-0.3,0.2-0.8,0.3-1.4,0.3h-6.5v3.7L177.8,89.6L177.8,89.6z"></path>
+          <path class="st2" d="M194.2,86.9h-2.6c-0.5,0-0.8-0.1-1.1-0.3c-0.3-0.2-0.4-0.5-0.4-0.9c0-0.3,0.1-0.7,0.4-0.9
+		c0.3-0.2,0.6-0.3,1.1-0.3h3.8c0.7,0,1.3,0.1,1.6,0.3c0.3,0.2,0.5,0.6,0.5,1v5.6c0,0.5-0.1,0.7-0.3,1c-0.2,0.2-0.5,0.3-0.9,0.3
+		c-0.3,0-0.6-0.1-0.9-0.2c-0.2-0.2-0.4-0.4-0.5-0.7l-0.3-1.1c-0.6,0.7-1.4,1.3-2.2,1.6c-0.8,0.3-1.7,0.5-2.8,0.5
+		c-2.4,0-4.4-0.7-5.8-2.1c-1.5-1.4-2.2-3.3-2.2-5.6s0.7-4.2,2.2-5.6c1.5-1.4,3.5-2.1,5.9-2.1c0.8,0,1.6,0.1,2.2,0.2
+		c0.7,0.1,1.4,0.3,2,0.6c0.9,0.4,1.5,0.8,2,1.3c0.5,0.5,0.7,1,0.7,1.4c0,0.4-0.2,0.7-0.5,1c-0.3,0.3-0.6,0.4-1.1,0.4
+		c-0.4,0-0.7-0.1-1-0.2c-0.3-0.1-0.6-0.4-1-0.8c-0.5-0.5-1-0.9-1.4-1.1c-0.5-0.2-1.1-0.3-1.8-0.3c-1.4,0-2.6,0.5-3.4,1.3
+		c-0.8,0.9-1.2,2.1-1.2,3.7c0,1.6,0.4,2.8,1.3,3.7c0.9,0.9,2.1,1.3,3.5,1.3c1.2,0,2.1-0.3,2.8-0.9C193.5,88.7,193.9,87.8,194.2,86.9
+		z"></path>
+          <path class="st2" d="M212.6,86.9H210c-0.5,0-0.8-0.1-1.1-0.3c-0.3-0.2-0.4-0.5-0.4-0.9c0-0.3,0.1-0.7,0.4-0.9
+		c0.3-0.2,0.6-0.3,1.1-0.3h3.8c0.7,0,1.3,0.1,1.6,0.3c0.3,0.2,0.5,0.6,0.5,1v5.6c0,0.5-0.1,0.7-0.3,1c-0.2,0.2-0.5,0.3-1,0.3
+		c-0.3,0-0.6-0.1-0.9-0.2c-0.2-0.2-0.3-0.4-0.5-0.7l-0.3-1.1c-0.6,0.7-1.4,1.3-2.2,1.6c-0.8,0.3-1.8,0.5-2.9,0.5
+		c-2.4,0-4.4-0.7-5.9-2.1c-1.5-1.4-2.2-3.3-2.2-5.6s0.7-4.2,2.2-5.6c1.5-1.4,3.5-2.1,5.9-2.1c0.8,0,1.6,0.1,2.2,0.2
+		c0.7,0.1,1.4,0.3,2,0.6c0.9,0.4,1.5,0.8,2,1.3c0.5,0.5,0.7,1,0.7,1.4c0,0.4-0.1,0.7-0.5,1c-0.3,0.3-0.7,0.4-1.1,0.4
+		c-0.3,0-0.7-0.1-1-0.2c-0.3-0.1-0.6-0.4-1-0.8c-0.5-0.5-0.9-0.9-1.4-1.1c-0.5-0.2-1.1-0.3-1.8-0.3c-1.4,0-2.6,0.5-3.4,1.3
+		c-0.8,0.9-1.2,2.1-1.2,3.7c0,1.6,0.4,2.8,1.3,3.7c0.9,0.9,2,1.3,3.5,1.3c1.1,0,2.1-0.3,2.8-0.9C212,88.7,212.5,87.8,212.6,86.9z"></path>
+          <path class="st2" d="M230.5,89.6c0.6,0,1.2,0.1,1.4,0.3c0.3,0.2,0.5,0.6,0.5,1s-0.2,0.7-0.5,1c-0.3,0.2-0.8,0.3-1.4,0.3h-9
+		c-0.8,0-1.4-0.2-1.7-0.5c-0.3-0.3-0.5-0.9-0.5-1.8V80c0-0.9,0.2-1.5,0.5-1.8c0.3-0.3,0.9-0.5,1.7-0.5h8.6c0.6,0,1.1,0.1,1.4,0.3
+		s0.5,0.5,0.5,1c0,0.4-0.2,0.7-0.5,0.9c-0.3,0.2-0.8,0.3-1.4,0.3h-7.2v3.1h6.6c0.6,0,1.1,0.1,1.4,0.3c0.3,0.2,0.5,0.5,0.5,1
+		c0,0.4-0.2,0.7-0.5,0.9c-0.3,0.2-0.8,0.3-1.4,0.3h-6.6v3.7L230.5,89.6L230.5,89.6z"></path>
+          <path class="st2" d="M238.4,80.3v3.9h4.1c0.9,0,1.6-0.2,2-0.5c0.4-0.3,0.6-0.8,0.6-1.4c0-0.6-0.2-1.1-0.6-1.4
+		c-0.4-0.3-1-0.5-1.8-0.5H238.4L238.4,80.3z M238.4,90.8c0,0.5-0.1,0.9-0.5,1.2c-0.3,0.3-0.7,0.4-1.3,0.4s-1-0.1-1.3-0.4
+		c-0.3-0.3-0.5-0.7-0.5-1.2V80c0-0.9,0.2-1.5,0.5-1.8c0.3-0.3,0.9-0.5,1.7-0.5h6.2c1.9,0,3.3,0.3,4.1,1c0.9,0.7,1.4,1.7,1.4,3.1
+		c0,0.9-0.2,1.6-0.7,2.2c-0.5,0.6-1.1,1-1.9,1.2c0.6,0.2,1.1,0.5,1.5,0.9c0.3,0.4,0.5,0.9,0.6,1.6c0.1,0.3,0.1,0.6,0.1,1
+		c0,0.5,0.1,0.7,0.1,0.9c0.1,0.2,0.1,0.4,0.2,0.7c0.1,0.3,0.1,0.6,0.1,0.7c0,0.4-0.2,0.7-0.5,1c-0.3,0.2-0.7,0.3-1.3,0.3
+		c-0.7,0-1.3-0.2-1.6-0.5c-0.3-0.3-0.5-1.3-0.6-2.8c-0.1-1.1-0.3-1.9-0.7-2.2c-0.3-0.3-1-0.4-1.9-0.4h-3.7v4.3H238.4z"></path>
+        </g>
+        </svg> </div>
+        <div class="claim">The Embedded Experts</div>
+        <div class="head">
+          <div class="container">
+            <h1>Release notes for emUSB-Device V3.52.2         </h1>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ****************************************************************** -->
+    <!-- History                                                            -->
+    <!-- ****************************************************************** -->
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.52.2 [25. Oct 2022]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>PSoC6 driver: Added suspend and resume handling.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>HID class: Input reports via control requests may be send with wrong length. Fixed.</li>
+            <li>HID: Report descriptor in USB_HID_MMControl.c sample was not fully compliant. Fixed.</li>
+            <li>PSoC6 driver: Update endpoints did not work after re-configuration. Fixed.</li>
+            <li>XHCI driver: Number of available endpoints were not counted correctly. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.52.1 [25. Aug 2022]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>PSoC6 driver: Added support for Isochronous transfers.</li>
+            <li>PSoC6 driver: Added support for LPM.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.52.0 [18. Aug 2022]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>HID class: New functions USBD_HID_Receive() and USBD_HID_ReceivePoll().</li>
+            <li>Cypress PSoC62 driver: Added support USBD_SetOnSOF().</li>
+            <li>Cypress PSoC62 driver: New macro to configure interrupt level.</li>
+            <li>DWC2 driver: Add support for LPM.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>embOS layer: Improved accuracy of function USB_OS_GetTickCnt() for system tick rates less 1 ms.</li>
+            <li>FreeRTOS layer: Improved accuracy of function USB_OS_GetTickCnt() for system tick rates less 1 ms.</li>
+            <li>Support for experimental feature "MSD/MTP combination" was removed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.50.4 [21. Jul 2022]</h2>
+        <div>
+          <h3>No public changes</h3>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.50.3 [11. Jul 2022]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for Ambiq Micro Apollo 4 devices.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>DWC2 DMA driver: In rare cases setup OUT transaction may have failed. Fixed.</li>
+            <li>MTP: Sending a remove directory event did not work properly. Fixed.</li>
+            <li>MTP: Cleaning the object list and deleting the MTP session now happens only when OpenSession or CloseSession is executed. This helps prevent issues which can occur with Windows suspend. Fixed.</li>
+            <li>MTP: When an MTP device entered suspend mode it was possible for a STALL condition to be erroneously set. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.50.2 [24. Jun 2022]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>DFU class: Changed GUID for Windows to distinguish from BULK class.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MTP: The "seconds" field of the file timestamp was saved incorrectly. Fixed.</li>
+            <li>MTP: When receiving a new file it was not checked whether the volume has enough space for it. Fixed.</li>
+            <li>Renesas driver: USB test mode command was not acknowledged to the host. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.50.1 [1. Jun 2022]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Renesas driver: Added support for USB test mode</li>
+            <li>Added support for GD32F407 devices</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>MTP: Added mutex locking between USBD_MTP_SendEvent() and USBD_MTP_Task()/USBD_MTP_Poll(). Customers no longer need to do this manually.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MTP: The USB_MTP_EVENT_STOREREMOVED event sent via USBD_MTP_SendEvent() erroneously deleted the object list. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.50.0 [13. May 2022]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for Cypress PSoC62 devices, supporting Control, Bulk, Interrupt transfers.</li>
+            <li>Synopsys DWC2 DMA driver: Added address mapping for mirrored memory areas.</li>
+            <li>Synopsys DWC2 DMA driver: Support high bandwidth ISO transfers.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Atmel HS driver: Add attach/detach functionality.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Entering USB test mode may fail due to a race condition. Fixed.</li>
+            <li>Audio: Chapter 9 Device Descriptor Test would fail if IAD was not enabled. Fixed.</li>
+            <li>VirtualMSD: Multiple volumes (Luns) now get different volume IDs in the boot sector.</li>
+            <li>Bulk: Host API for Linux: When adding a new device it was possible for a previously open device handle to be overwritten Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.46.4 [17. Mar 2022]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for DialogSemi DA148xx devices.</li>
+            <li>Added support for RaspberryPi 2040 devices.</li>
+            <li>Added new function USBD_SetOnSOF().</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>RNDIS, CDC-ECM, CDC-NCM: When deinitializing emUSB-Device stack the OnStateChangeHook was not removed by the USB NI Driver for emNet. Fixed.
+              <br><b>In order to apply this fix, emNet V3.42.3 is necessary.</b></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.46.3 [22. Feb 2022]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>MTP: Added the USBD_MTP_SetObjectAllocFailCb() function which allows to set a callback which will be called when the MTP object list runs full.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Audio: Added functionality to pass user context to the OnIn/OnOut callbacks.</li>
+            <li>Synopsys DWC2 driver: Added support for remote wakeup and test mode.</li>
+            <li>USB_DRIVER_STM32L4xx_DetectChargingPort: Added delay after enabling DCD because on some STM32L4xxx variants for a short time after enabling the charger detection unit would report false positives.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Audio: Audio did not work on Windows when it was a part of a composite device. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.46.2 [11. Nov 2021]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for Renesas RA6M3 devices.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Kinetis KHCI driver: Cleanup and save some RAM.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>NCM, ECM: In rare cases multiple USB writes were merged to a single USB packet which could break the IP protocol. Fixed.</li>
+            <li>MSD: When we received a StartStopUnit command from the host with Start = 0 we would inadvertently prevent the StartStopUnit command from being executed again. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.46.1 [20. Oct 2021]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MSD: If the host requested more than the standard 18 bytes during the "RequestSense" command the device would return garbage for the remaining bytes. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.46.0 [18. Oct 2021]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for Renesas RX72N devices.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>LPC55xxx, iMXRT595 driver: Increase transfer speed with advanced buffer usage.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>NCM class: Communication didn't work correctly with new Linux NCM driver. Fixed.</li>
+            <li>RNDIS class: Return from suspend state wasn't handled correctly. Fixed.</li>
+            <li>LPC54xxx, LPC55xxx, iMXRT595 driver: 'Clear Feature Halt' was not handled correctly on OUT endpoints. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.44.0 [17. Sep 2021]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for Renesas RA6M4 devices.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>FreeRTOS layer: Improvement for easy use on non Cortex-M devices.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MSD: Ejecting an MSD volume from the PC would cause the volume to remain in "ejected" state even after detach. Fixed.</li>
+            <li>Bulk: Host API for Linux did not re-scan for devices after calling USBBULK_AddAllowedDeviceItem(). Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.42.1 [30. Jul 2021]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for Giga Device GD32F450.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.42.0 [12. Jul 2021]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>HID: Added function USBD_HID_AddEx(). The name of the HID interface can now be set.</li>
+            <li>Added support for Renesas RA4M3 devices.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>embOS layer: Support system tick rates different from 1 ms.</li>
+            <li>FreeRTOS layer: Support system tick rates different from 1 ms.</li>
+            <li>STM32 driver: Clean up initialization sequence to avoid USB reset interrupt before attach</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MTP: Fixed potential NULL pointer access when MTP_SAVE_FILE_INFO is 1.</li>
+            <li>MTP: USBD_MTP_Poll() returned 0 for success instead of 1. Fixed.</li>
+            <li>Synopsys DWC2 driver: Avoid potential problems caused by code optimization of some compilers.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.40.0 [31. Mar 2021]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>New vendor class VSC</li>
+            <li>Added support for iMXRT1170 devices.</li>
+            <li>Added support for iMXRT595 devices.</li>
+            <li>Added support for MAX32570 devices.</li>
+            <li>Added support for nRF5340 devices.</li>
+            <li>XHCI driver: Added isochronous endpoint support.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Isochronous endpoints do not need a buffer any more.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>XHCI driver: Successful enumeration sometimes only happened with a second retry by the host. Fixed.</li>
+            <li>UVC: Class could access a NULL pointer if the host sent a request for an unsupported control command. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.38.0 [29. Jan 2021]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>DFU: Support alternate interfaces.</li>
+            <li>General: Allow SuperSpeed, high bandwidth endpoints (if supported by the driver).</li>
+            <li>Printer: Added USB_PRINTER_SetClass() function.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>MUSB driver refactored (TI OMAP-L138, TI TM4Cxxx).</li>
+            <li>UVC: Corrected a couple of issues reported by the USB.org UVC test suite.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>SAM3S driver: EP0 size was erroneously limited to 8 bytes. Fixed.</li>
+            <li>SAM3S driver: Canceling write transfers was not implemented. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.36.3 [18. Dec 2020]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Bulk: USB_BULK_FLAG_USE_CUSTOM_CLASS_IDS caused a panic check. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.36.2 [15. Dec 2020]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Bulk: Added function USBD_BULK_PollForTX().</li>
+            <li>Bulk: Added ability to set a custom Class/Subclass/Protocol (via USB_BULK_FLAG_USE_CUSTOM_CLASS_IDS).</li>
+            <li>CDC: Added function USBD_CDC_PollForRX().</li>
+            <li>CDC: Added function USBD_CDC_PollForTX().</li>
+            <li>CDC: Added function USBD_CDC_ReceivePoll().</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>General: USBD_SetMaxPower() now accepts values up to 900mA for SuperSpeed.</li>
+            <li>General: Added missing replacement macros for stdlib functions (strlen, strcat, strrchr, strncpy, strcmp can now also be overwritten via USB_STRLEN, USB_STRCAT, etc.).</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.36.1 [30. Oct 2020]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>MTP: Added function USBD_MTP_Poll() which allows the MTP module to be used without blocking the calling task.</li>
+            <li>Added support for RZ/A2M devices.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>USBD_MSD_Poll() was extended with additional return values.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.36.0 [12. Oct 2020]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for STM32L5x2 devices.</li>
+            <li>STM32 FS driver: Added isochronous endpoint support.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Audio: Channels can now be assigned to spatial locations.</li>
+            <li>Audio: Multiple formats with different bit-depths are now supported.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>UVC: Bulk mode caused high CPU load. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.34.3 [25. Aug 2020]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for LPC51xxx devices.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Audio: Added support for additional controls for the microphone interface.</li>
+            <li>Audio: Added support for the SAMPLING_FREQ_CONTROL command, setting multiple sampling frequencies is supported now, for this purpose USBD_AUDIO_SPEAKER_CONF/USBD_AUDIO_MIC_CONF was extended with an array of frequencies (paSamFreq) and the
+              number of elements in the array (NumFreq).</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Bulk: Host API for Linux did not free udev and udev_enumerate objects. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.34.2 [23. Jul 2020]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>General: Classes which used a OnSetInterface callback (Audio, Video, IP-over-USB, Bulk with USBD_BULK_AddAlternateInterface()) can now be used together in a composite device without any issues.</li>
+            <li>EHCI: Driver refactored. Smaller code size on cache-less systems, greatly improved performance of unaligned transfers on systems with cache.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MSD: USBD_MSD_RequestRefresh() would not disconnect unless the USB_MSD_RE_ATTACH flag was set. Fixed.</li>
+            <li>MSD: When using USBD_MSD_RequestRefresh() with USB_MSD_TRY_DISCONNECT and a second Lun and the host acknowledged the disconnect the second Lun would be erroneously disconnected. Fixed.</li>
+            <li>General: The USB SetInterface command would cause all transfers on all endpoints to be aborted. This could cause problems for composite devices which use classes which use the SetInterface command. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.34.1 [15. Jun 2020]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>IP over USB: Can now also be used with CDC-NCM instead of CDC-ECM.</li>
+            <li>USBBULK.net: Read methods return with an error code rather raising an exception when a timeout/cancel occurred. </li>
+            <li>USBBULK/SEGGER driver: String descriptors are cached internally rather than retrieving them from USB device. </li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>CDC-NCM: Wrong protocol value was used for the CDC-NCM data class. Fixed.</li>
+            <li>IP over USB/CDC-ECM/CDC-NCM/RNDIS: Resuming from suspend did not work properly. Fixed.</li>
+            <li>HID: SET_PROTOCOL did not work properly. Fixed. </li>
+            <li>USB_DRIVER_STM32F7xxHS_ConfigPHY() did not work correctly. Fixed. </li>
+            <li>USB 3.0 BOS descriptor did not contain correct 'ExitLatency' fields. Fixed. </li>
+            <li>CCID: Value for USB_CCID_FEATURE* defines fixed. </li>
+            <li>AT91SAM3X driver: Aborting transfers did not work correctly. Fixed. </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.34.0 [20. Mar 2020]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for iMXRT1020 devices.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>BULK interface: Added new function USBD_BULK_AddAlternateInterface().</li>
+            <li>EHCI: Disabled unused code.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Synopsys DWC2 FS driver: Transfer of data blocks >= 64KB did not work correctly. Fixed.</li>
+            <li>Windows USB BULK API: On Windows under some circumstances, detection of device attach or remove events did not function properly. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.32.0 [28. Feb 2020]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added Smart Card reader Interface (CCID) class support.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>EHCI: Under some circumstances control IN transfers with multiple packets did not work correctly. This problem affects versions 3.28.0 to 3.30.0. Fixed.</li>
+            <li>USBBULK.dll: Under some circumstances removal or arrival of USB BULK devices was not recognized. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.30.0 [27. Jan 2020]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added Musical Instrument Digital Interface (MIDI) class support.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Printer class: It was possible for the requested length of a class request on the EP0 to be parsed incorrectly. Fixed.</li>
+            <li>BULK.net API: On Windows under some circumstances, detection of device attach or remove events did not function properly. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.28.1 [13. Dec 2019]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>OS layer:The FreeRTOS_s OS layer failed to compile due to some missing macros. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.28.0 [29. Nov 2019]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Printer class: Added new function USB_PRINTER_SetOnVendorRequest() which allows to register a callback for proprietary printer commands.</li>
+            <li>DWC2 driver (STM32L4): Added new function: USB_DRIVER_STM32L4xx_DetectChargingPort which allows to differentiate between different types of charging ports using the integrated battery charging detector.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>EHCI: The force full-speed bit is no longer reset by the EHCI initialization routine.</li>
+            <li>BULK API: Detection of BULK devices has been improved.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>UVC: Device was not accessible from camera viewer programs running on Windows when the processing unit descriptor was used. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.26 [30. Aug 2019]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added Communication Device Class Network Control Model (CDC-NCM) support.</li>
+            <li>Add support for NXP RT106x controllers.</li>
+            <li>Atmel SAMA5D2x, SAMA5D3x driver: DMA support added.</li>
+            <li>UVC: Added USBD_UVC_WriteEx() which is optimized for usage with DMA capable targets. Added support for multiple video controls (zoom, focus, etc.).</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Enumeration: Support Exit Latency in USB descriptors (USB 3.0)</li>
+            <li>USB Renesas driver: Added support for keeping RX interrupts enabled: USB_RX_KEEP_BRDYENB</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>General: Zero length packets that should be send to the host may have been suppressed if followed by data packets immediately. Fixed.</li>
+            <li>RX100: Device controller is capable of clearing the FIFO buffer automatically -> USB_READ_NEEDS_BUFFERCLR set to 0.</li>
+            <li>Windows BULK API: USBBULK_CancelRead() and USBBULK_CancelWrite() for devices using SEGGER USB BULK driver (USBBULK.sys) did not work properly when called from another thread. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.24a [23. Jul 2019]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for Xilinx Zynq.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>DFU class: Added MSOS descriptors to select WinUSB driver on Windows.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Synopsys DWC2 driver: ISO did not work with controllers which need the DWC2_RX_FIFO_ON_CTRL_WORKAROUND flag (STM32L4x2, STM32L4x3, STM32F412). Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.24 [1. Jul 2019]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added USB Device Firmware Upgrade (DFU) support.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Added support for USB 3.2 setup commands.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>EHCI driver: Data corruption may occur on OUT endpoints on systems using cached memory. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.22 [17. Jun 2019]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added USB 3.0 support.</li>
+            <li>Added support for Xilinx Zynq Ultrascale.</li>
+            <li>Added support for STM32L4x2 devices.</li>
+            <li>Added USB Video device Class (UVC) support.</li>
+            <li>Support for WebUSB specific descriptors and setup requests.</li>
+            <li>MSD: Added function USBD_MSD_Poll() which allows the MSD module to be used without blocking the calling task.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>BULK interface: Added new functions USBD_BULK_ReceivePoll() and USBD_BULK_PollForRX().</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>ATSAMV7x driver: Only 7 endpoints (out of 10) could be used. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.20 [15. May 2019]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for NXP LPC55xxx controllers.</li>
+            <li>Support USB descriptors required for USB 3.0 devices.</li>
+            <li>HID: Added USBD_HID_ReadReport function.</li>
+            <li>Added embOS v5 RTOS layer (the old layer also still works, this one only uses the new function names).</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>LPC54xxx FS driver: Reduce interrupt load. NAK interrupt handling was introduced by a workaround in V3.18a (Stall/ClearFaetureHalt problem). NAK interrupts are now enabled on demand only.</li>
+            <li>SmartMSD was renamed into VirtualMSD.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>HID: Set Feature control command did not work if the HID device has an OUT EP. Fixed.</li>
+            <li>LPC54xxx driver (HS+FS): Control OUT transfers may fail under some circumstances. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.18c [29. Mar 2019]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Renesas R8A66597: Receiving EPs are using now the continuous mode rather than the conventional mode.</li>
+            <li>RNDIS: Changed USB Class field value in Device descriptor to CDC which allows Windows to enumerate RNDIS properly.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.18b [04. Mar 2019]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MSD: When operating in idle (only TestUnitReady commands are sent from the host to the MSD device) it was sometimes possible for the MSD module to loose an incoming command which would cause the host to mark the MSD device as not responding
+              and re-enumerate it. Fixed. </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.18a [28. Feb 2019]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Add support for NXP RT105x controllers.</li>
+            <li>Add support for ST STM32L0538 controllers.</li>
+            <li>Enumeration: Allow a device to have no serial number.</li>
+            <li>Enumeration: Allow to set ISO transfers types in the endpoint descriptor.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Synopsys DWC2 driver: Allow to configure endpoint memory buffer.</li>
+            <li>General: Moved USB_OS_Panic() from the respective RTOS layers into USB_ConfigIO.c.</li>
+            <li>Bulk host API: Function USBBULK_ResetPipe was removed. Functions USBBULK_ResetINPipe() and USBBULK_ResetOUTPipe() were added.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>LPC546 FS driver: It was possible for a ClearFeatureHalt request to not clear the data toggle value. This could cause issues for protocols which use the STALL request on non-control EPs (e.g. MSD). Fixed.</li>
+            <li>MSD: When an MSD command was completed with an error and the error was not immediately cleared by the host it was possible for the module to enter a busy-loop until the error condition was resolved by the other side. Fixed. </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.18 [27. Nov 2018]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Renesas USB: All HS and FS have been merged to one driver including the external USB controller Renesas R8A66597.</li>
+            <li>Renesas USB: Timeout value for a FIFO stuck has been set to minimum value to reduce interrupt execution.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Synopsys DWC2 driver: Under some circumstances ISO OUT transfers did not work. Fixed</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.16a [08. Oct 2018]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>STM32L4xx driver: Workaround for the setup transfer issue of the hardware improved.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.16 [05. Oct 2018]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>TZ1200: Added support for Toshiba TZ1200 series devices.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>MTP: USBD_MTP_SendEvent now has a return value indicating success or failure.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>STM32L4xx driver: Setup OUT packets are sometimes get corrupted due to a hardware issue of the MCU. Workaround implemented.</li>
+            <li>MTP: USBD_MTP_SendEvent no longer sends data via an asynchronous write. This could result in events being lost if many events were sent at once. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.14 [20. Jul 2018]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>LPC54: Added support for the NXP LPC54xxx devices.</li>
+            <li>nRF52: Added support for the Nordic Semiconductor nRF52840 devices.</li>
+            <li>BULK interface: Added new functions USBD_BULK_ReadAsync() and USBD_BULK_WriteAsync().</li>
+            <li>CDC class: Added new functions USBD_CDC_ReadAsync() and USBD_CDC_WriteAsync().</li>
+            <li>Renesas FS driver: Added support for ISO transfers.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>EHCI driver: Allow to configure endpoint memory buffer.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>BULK interface: Request for MS extended compatible id was not answered correctly if size >= maximum packet size of EP0. Fixed.</li>
+            <li>Atmel SAMD21 driver: USB_Read could not be retriggered in event callback function. Fixed.</li>
+            <li>Atmel SAMD21 driver: Read timeouts were not handled correctly on multi-packet reads. Fixed.</li>
+            <li>Renesas HS driver: It was possible for the BaseAddress variable to be set to 0, which would break communication. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.12a [07. May 2018]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>SAM3U: Added missing source file to driver package.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.12 [04. May 2018]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>MTP: Added support for the GetPartialObject command.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Core stack: Added new function USBD_RemoveOnEvent().</li>
+            <li>Logging: Functions USBD_SetLogFunc() and USBD_SetWarnFunc() are now obsolete. USB_X_Log() and USB_X_Warn() are now always called for log output.</li>
+            <li>ECM / RNDIS / IP-over-USB: Added de-initialization handlers.</li>
+            <li>Audio: Added tasks for read/write handling. Allows the read/write callbacks to notify the application of timeouts.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>USBBULK API: USBBULK_CancelRead() did cancel all pending reads independent of the instance. Fixed.</li>
+            <li>Enumeration: Other speed descriptor may contain incorrect packet sizes. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.10 [22. Mar 2018]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added Audio class.</li>
+            <li>BULK interface: Added new function USBD_BULK_Add_Ex().</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Atmel SAMA5D2x, SAMA5D3x driver: Transfer speed improved.</li>
+            <li>Synopsys DWC2 driver: Support ISO transfers.</li>
+            <li>EHCI driver: Allow ISO transfers.</li>
+            <li>Atmel High speed driver: Allow ISO transfers.</li>
+            <li>VirtualMSD: Changed USB_VMSD_FILE_INFO to access the short dir entry directly, removed long dir entry from the documentation as it is only used internally.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>USBBULK API: In case starting the device failed, the memory was not cleaned up and the failed instance was still in memory. Fixed.</li>
+            <li>USBBULK API: Removed fixed DLL binding to CancelIoEx() which only be used when Windows version > Windows XP -> dynamically used. Removed some minor errors.</li>
+            <li>Renesas FS driver: Big Endian was not handled properly. Fixed.</li>
+            <li>Renesas FS driver: When aborting a write transfer, remaining FIFO contents was not flushed. Fixed.</li>
+            <li>RNDIS: EP0 send-data have been modified after the USBD_WriteEP0FromISR() was called. Fixed.</li>
+            <li>Atmel High speed driver (SAM3U, SAMA5D2/3/4x, SAM9x25): Write timeout was not handled correctly. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.08a [14. Feb 2018]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>MTP: Changed USB Class/Subclass/Protocol to PTP in order to allow to be enumerated as PTP in case MTP is not recognized.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.08 [13. Feb 2018]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Cypress MB9BFxxx support: Added support for MB9BFxxx devices.</li>
+            <li>New function USBD_AddEPEx which allows to configure the maximum packet size of an endpoint.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>EHCI driver: Dynamic endpoint buffer configuration allows reduced RAM usage, if not all endpoints are used.</li>
+            <li>Synopsys DWC2 driver: Dynamic endpoint buffer configuration allows reduced RAM usage, if not all endpoints are used.</li>
+            <li>RNDIS: Changed USB Class/Subclass/Protocol to USB.org assigned IDs (0xE0/0x01/0x03).
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Synopsys DWC2 driver: High speed controller did not work correctly when enumerated in full speed. Fixed.</li>
+            <li>Renasas FS driver (RX, Synergy): Under some circumstances a GET control request (EP0) was not handled properly after a SET control request (EP0) was executed. Fixed.<br> Double-buffering has been disabled on RX targets for safety reasons (data
+              loss).
+            </li>
+            <li>USBBULK API: CancelOperation was pending even though the handle was closed and a new open was initiated. Fixed.<br> Reference counter was not locked in release version which can have undefined behavior. Fixed.</li>
+            <li>IP-over-USB: IP_Config_IP_over_USB.c did not initialize the Init structure for USBD_IP_Add() which could cause an exception. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.06e [12. Jan 2018]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>ST STM32H7 support: Added support for STM32H7xx devices.</li>
+            <li>SliliconLabs EFM32GG11 support: Added support for EFM32GG11 devices.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.06d [19. Dec 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>USBBULK.net: Added new methods WriteTimed and ReadTimed.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Kinetis KHCI driver: Abort of an endpoint did not work correctly. Fixed.</li>
+            <li>MSD: LUN serial numbers longer than 32 bytes would cause a memcpy with a negative array offset, potentially leading to undefined behaviour. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.06c [04. Dec 2017]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>USB BULK API: The Windows host API can now detect devices which have been enumerated by a third party USB 3.0 host controller driver. These drivers do not handle MS OS descriptors properly, which could cause enumeration to fail.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Renesas USB FS driver: Stalling a setup request sometimes did not work. Fixed.</li>
+            <li>MSD: USBD_MSD_Disconnect() became ineffective after new enumeration. Fixed.</li>
+            <li>Synopsys DWC2 driver: Driver for HS controller in FS mode separated.</li>
+            <li>Synopsys DWC2 driver: HS controller in FS mode reported high-speed state wrongly. Fixed.</li>
+            <li>Renesas Synergy FS driver: Sometimes NULL packets were not sent to the host. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.06b [13. Oct 2017]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>USB BULK API: New functionality added to allow to send SETUP requests to target devices. For USBBULK.dll and USBBULK.net a new function was introduced. On target side new callbacks can be registered to retrieve SETUP vendor requests or any
+              other SETUP request.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>IP-over-USB: Under certain circumstances switching between ECM mode and RNDIS may not work properly. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.06a [28. Sep 2017]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>XMC4500, STM32L4xx driver: Improved write transfer speed using dynamic FIFO allocation and double buffering.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>ATSAMV7x driver: On a write timeout the endpoint was not reset correctly and gets blocked. Fixed.</li>
+            <li>XMC4500 driver: Setup responses with multiple packet size length did not work correctly. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.06 [19. Sep 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>IP-over-USB, CDC-ECM, RNDIS: This release makes the requirement for tasks obsolete. USBD_IP_Task(), USBD_ECM_Task() or USBD_RNDIS_Task() are no longer necessary as everything is handled through callbacks (thereby reducing overhead). To use
+              this feature embOS/IP V3.22b or newer is required.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Printer class: Taskless operation is possible now, if all printer data can be processed in an interrupt.</li>
+            <li>STM32 driver (STM32F0/F3): Enhanced overall read speed in the driver.</li>
+            <li>ATSAMV7x driver: Optimize DPRAM usage to have more endpoints.</li>
+            <li>EHCI driver: Reduce RAM usage.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>TI OMAP-L138 driver: Under some circumstances the RX buffer can overflow, resulting in data loss. Fixed.</li>
+            <li>Renesas USB HS driver: Stalling a setup request sometimes did not work. Fixed.</li>
+            <li>Renesas USB FS driver: With a self-powered device it was possible upon a second enumeration for the first two packets to be sent in the wrong order. Fixed.</li>
+            <li>Interrupt endpoints: Interval settings &lt; 1ms were not handled correctly, if the device was enumerated in full speed. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.04b [29. Aug 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Drivers: Migrated STR91x driver to emUSB 3 API.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.04a [17. Aug 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Drivers: Migrated Toshiba TMPA900 driver to emUSB 3 API.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.04 [24. Jun 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>IP-over-USB: Added new component emUSB-Device-IP to easily run any IP-based protocol over USB.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02q [17. Jun 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Synopsys DWC2 driver: Added BSP and configuration files for the STM32F769 Discovery evaluation board.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02p [14. Jun 2017]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Printer class: USB_PRINTER_Task did not work correctly on USB disconnect. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02o [13. Jun 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>MTP: Support for Read/Write callbacks added.</li>
+            <li>MSD / MTP: Added MSD and MTP combination feature.</li>
+            <li>SystemView: SystemView support added.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>EHCI driver: Receiving non-setup OUT data on endpoint 0 could lead to controller fatal error. Fixed.</li>
+            <li>Synopsys DWC2 driver on STM32: High speed controller did not work when enumerated in full speed. Fixed.</li>
+            <li>Renesas USB HS driver: Enumeration or setup requests may fail due to wrong interrupt handling. Fixed.</li>
+            <li>HID: On some devices the setup request SET_REPORT was not handled correctly. Fixed.</li>
+            <li>MTP: A missing interface name string descriptor prevented emUSB-Device-MTP from being recognized as MTP by Android. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02n [12. Jun 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>AT91SAM9X25: Added Support for Atmel AT91SAM9X25 devices.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02m [08. Jun 2017]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Synopsys DWC2 driver on STM32: Under some circumstances the FIFO size registers could not be written. Workaround implemented.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02l [02. Jun 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>IP: Preliminary version of component emUSB-Device-IP to easily run any IP-based protocol over USB.</li>
+            <li>STM32F7: Added Support for STM32F7 devices -&gt; more endpoints available.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>USBBULK .net component: Updated new version that contains USBBULK.net V1.20.</li>
+            <li>Renesas Synergy HS driver: Enhanced overall read/write speeds in the driver.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MSD: Under some circumstances the MSD task could hang when the device is removed from host. Fixed.</li>
+            <li>MSD: After re-plugging a MSD device to host the device may not work. Fixed.</li>
+            <li>MTP: The IAR ARM compiler generates wrong code for the function ExecGetObjectPropList when using high optimization level. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02k [26. Apr 2017]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>KHCI driver: Enhanced read speed in KHCI driver.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>LPC43xx driver: Maximum number of endpoints for full speed corrected.</li>
+            <li>Synopsys DWC2 driver: Controller may receive an extra packet after an endpoint is disabled. Handling of extra packets implemented.</li>
+            <li>Renesas RX driver: Driver did not properly function with RX231 and RX113. Fixed.</li>
+            <li>MSD: When user assigned a value to pInstData-&gt;DriverData.NumSectors the value was ignored. Fixed.</li>
+            <li>MSD: Sending the CSW did not return when device is disconnected from host. Fixed.</li>
+            <li>MSD: Internal variables were not reset after leaving the MSD Task loop. Fixed.</li>
+            <li>Enumeration: Endpoint descriptors for interrupt endpoints did not always contain the correct value for &#39;bInterval&#39;. Fixed.</li>
+            <li>Enumeration: Unit of the &#39;Interval&#39; parameter of the function USBD_AddEP() was changed to 125us.</li>
+            <li>Enumeration: It was possible for the callback set by USBD_SetGetStringFunc to not be called because the internal handler incorrectly reduced the received string index. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02j [01. Mar 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>SAMA5D2x: Added Support for Atmel SAMA5D2x devices.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>RX driver: Handling of Zero-Length-Packets was not handled correctly. Fixed. Waiting for the FIFO setting until the setting are set was not done. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02i [10. Feb 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Renesas Synergy devices: Added Support for Highspeed Controller in Synergy S3,S7 devices.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02h [26. Jan 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>ST STM32L4 support: Added support for STM32L4x6 devices.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02g [23. Jan 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Renesas Synergy devices: Added support for FullSpeed Controller in Synergy S1,S3,S7 devices.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02f [04. Jan 2017]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Renesas SH7269: Added support for SH7269.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02e [15. Dec 2016]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Atmel SAMA5D4: Added support for SAMA5D4.</li>
+            <li>Renesas R7FS7G2: Added support for R7FS7G2.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>ST STM32F4x, EnergyMicro EFM32GG: Improved write transfer speed using dynamic FIFO allocation and double buffering.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>EHCI driver: Correct handling of multiple TX packets on systems using cache.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02d [18. Nov 2016]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>BULK interface: Improve write speed when using SEGGER Windows driver on the host.</li>
+            <li>BULK interface: Removed FriendlyName entry from MS_ExtendedProperties table. This entry causes a lot of Windows versions to crash (BSOD) when the device is disconnected.</li>
+            <li>Debug Logging: Replace USBD_PrintSafe with SEGGER equivalent.</li>
+            <li>Synopsys DWC2 driver: Added a USB core reset at init, this alleviates issues with multiple re-enumerations on certain MCUs which use this USB controller.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Atmel UDP driver, Synopsys DWC2 driver, Freescale KHCI driver: Re-Initialization (after USBD_DeInit) is done correctly now.</li>
+            <li>MTP: Add timeout for reading zero packet.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02c [03. Nov 2016]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Initialization: Not all static variables were initialized correctly after low-power mode. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02b [31. Oct 2016]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>MSD: Handle timeouts during communication with host.</li>
+            <li>DA1468x driver: Handling of endpoint table changed to allow re-initialization.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>SMSD: API functions renamed (Old API function names still work).</li>
+            <li>Deinitialization: USBD_DeInit() did not always deinitialize all interfaces correctly. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02a [18. Oct 2016]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Atmel AT91SAM3X: Added support for AT91SAM3X.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.02 [10. Oct 2016]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>BULK: Support WinUSB driver for BULK communication.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>CDC: CDC devices can now be used on Windows 10 without installing a driver.</li>
+            <li>RNDIS, ECM: Added handling (self generated MAC addresses) when user did not assign a MAC address.</li>
+            <li>BULK: Support Windows/Linux/MacOSX hosts with the same target application.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>CDC: Under some circumstances a serial state packet was not send to the host. Fixed.</li>
+            <li>BSP.c/BSP_USB.c: It was possible for two interrupt handler routines (one for emUSB-Device and one for emUSB-Host) to be registered for one controller. This caused issues for OTG. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.00g [23. Aug 2016]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>MTP: Added support for the GetNumObjects MTP command.</li>
+            <li>MSD: Added new function USBD_MSD_RequestRefresh() to force reread of the storage by the host.</li>
+            <li>BULK: Added host API for Linux and Mac OSX.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>VirtualMSD: Improvements for using with Mac OSX.</li>
+            <li>DA1468x support: Update OS layer.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MTP: MTP_SUPPORT_EVENTS configuration define did not completely disable event handling when set to zero. Fixed.</li>
+            <li>STM32 driver: Check for overflow of buffer memory corrected.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.00f [01. Aug 2016]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>DA1468x support: Add support for Dialog Semiconductor DA1468x.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>VirtualMSD: API improved.</li>
+            <li>RNDIS, CDC_ECM: Updated IP driver with new embOS/IP function which allow us to access need information without accessing internal embOS/IP structures directly.</li>
+            <li>FreeRTOS layer: Allow static allocation of objects with FreeRTOS 9.0.0.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>CDC API: Definition of function USB_CDC_WriteTimedEx in migration layer corrected.</li>
+            <li>BULK interface: USBD_BULK_WriteEx(NumBytes=0, Timeout&gt;=0) didn&#39;t wait for completion of pending write transfers: Fixed.</li>
+            <li>STM32 driver: Buffer sizes were not set properly which could lead to all sorts of strange effects.</li>
+            <li>STM32 driver: Added a panic check for endpoint allocations which makes sure users do not allocate more endpoints than there is RAM for them.</li>
+            <li>STM32 driver: Added handling for unaligned access when using access width of 16.</li>
+            <li>STM32F0 driver: Merged with STM32 driver.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.00e [08. Jul 2016]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>TI AM335: Driver using DMA implemented.</li>
+            <li>STM32F7xx support: Added USB config files for the popular STM32F746 DISCO evalboard.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>OS Layer: New operating system layer interface implemented (Can be activated with &#39;#define USBD_OS_LAYER_EX 1&#39; in USB_Conf.h).</li>
+            <li>BULK: Added new configuration macro: USB_EXACT_DATASIZE_ON_CANCEL to speed up BULK reads on particular USB controllers (disables exact behaviour on cancelled read operations).</li>
+            <li>STM32F107: Merged the STM32F107 driver into the DWC2 driver.</li>
+            <li>TI AM335: Added Detach function.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>USB enumeration: A ZLP was sent for getdescriptor requests when the size of the descriptor matched the ep0 size. Fixed.</li>
+            <li>MSD: The device had to stall bulk ep IN when it sent less data than requested to the host. Fixed.</li>
+            <li>MSD: Fixed MSD_Task so that it correctly considers all return values of USBD_Receive.</li>
+            <li>MSD: Fixes for USB_V2_V3_MIGRATION_MSD_LUN_INFO</li>
+            <li>MSD: StorageRAM: Fixed GetBuffer* functions, previously they did not check buffer limits at all.</li>
+            <li>MTP: Updated NULL Packet handling in _ReceiveBytes function (MTP transfer could have hang up on particular file sizes).</li>
+            <li>MTP: Fixes for USB_V2_V3_MIGRATION_MTP_INFO</li>
+            <li>STM32F1/2/4xx, EFM32GG, XMC45xx: Fix an issue in the driver if using Keil/ARM compiler with optimization (HardFault).</li>
+            <li>Sample configurations: emPower board: Bus muster priorities corrected. STM3210C-EVAL: config file updated.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.00d [08. Jun 2016]</h2>
+        <div>
+          <h3>Improvements</h3>
+          <ol>
+            <li>Freescale KHCI: Added optimized SendEP routine.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Atmel SAMD21 driver: NVM values for USB D+ and D- pads have been read in the wrong byte order. Fixed.</li>
+            <li>Atmel SAMD21 driver: Control request with a DATA OUT phase (CDC: SetLineCoding) did not work properly. Fixed.</li>
+            <li>Atmel SAMD21 driver: Setting an OUT Endpoint to NAK was done before the endpoint was properly initialized. Fixed.</li>
+            <li>TI AM335x driver: Start of frame interrupt removed as it is not necessary for the driver functionality.</li>
+            <li>TI AM335x driver: FIFO addresses were set incorrectly which could cause undefined behaviour when using multiple classes (composite device). Fixed.</li>
+            <li>MTP class: Certain return values during retrival of the object property list were ignored. Fixed.</li>
+            <li>Printer class: The receive data callback wrongly received the return values of the lower-level receive function. The callback is only to be called when at least one bytes is received. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.00c [23. May 2016]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>BULK: Added new configuration macro: USBD_BULK_REGULAR_2048_XFER to remove the optimization which is used with the SEGGER Windows Bulk driver. By default this macro is not set, it is only necessary when you are writing your own host driver,
+              in that case it can be added to the USB_Conf.h file.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>OS-Layer: Free-RTOS layer improved once more.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Atmel SAMD21 driver: Coming out of the USB suspend state did not work. Fixed.</li>
+            <li>uC/OS-II RTOS layer: Read functions would return with the busy flag (-4) under certain circumstances. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.00b [28. Apr 2016]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>MTP: Added new configuration macro: USB_MTP_NAME_CASE_SENSITIVE to ignore case sensitivity.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MTP:When MTP_SAVE_FILE_INFO was enabled function _AddObject did not compile due to wrong function call. Fixed.</li>
+            <li>MTP:_SetObjectPropObjectFileName: Wrong function was called to remove the object from the object store, resulted that a rename was not shown on the host. Fixed.</li>
+            <li>MTP:USBD_MTP_SendEvent: Calling the function with USB_MTP_EVENT_OBJECTADDED resulted in an undefined behaviour when searching for the object. Fixed.</li>
+            <li>MTP:USBD_MTP_SendEvent: USB_MTP_EVENT_OBJECTREMOVED used the file name instead of the file path to notify the host that the object was removed which resulted in showing the host the wrong file or that no file was removed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.00a [15. Apr 2016]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>HID: A callback can be set to be notified when a SET_REPORT or GET_REPORT is sent from the host.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>OS-Layer: The OS-Layer for Free-RTOS and uC/OS-II have been improved.</li>
+            <li>Renesas RX driver: Renesas RX62N driver has been renamed to Renesas RX, driver file name and its name has been renamed. Compatibility macros has been added.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>CDC-ECM: When disconnecting the CDC-ECM device from host, the disconnect was not properly handled. Fixed.</li>
+            <li>Atmel SAMD21: USB Resume interrupt did not work. Fixed.</li>
+            <li>Atmel SAMD21: Read and write operation did not check for proper data alignment. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.00 [18. Mar 2016]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Initial version. Customers coming from emUSB-Device V2 should read the emUSB-Device V3 migration guide. (Doc\AN09001_emUSB_V3_MigrationGuide.pdf).</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+    <!-- ****************************************************************** -->
+    <!-- Modifiable information ends here                                   -->
+    <!-- Don't forget to edit the "Copyright" year if necessary and         -->
+    <!-- >>>>>if a SUPPORT E-MAIL is required change the info@segger.com<<<<<<  -->
+    <!-- ****************************************************************** -->
+
+  </main>
+  <div class="footer">
+    <div class="container">
+      <div>
+        <p>Copyright 2001-2022 SEGGER Microcontroller GmbH. All rights reserved.<br> For more information, please visit our website&nbsp;<a href="https://www.segger.com/" target="_blank">www.segger.com</a>&nbsp;or contact us via&nbsp;<a href="https://www.segger.com/ticket"
+            target="_blank">www.segger.com/ticket</a>&nbsp;</p>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
