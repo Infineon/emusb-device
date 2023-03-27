@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -147,7 +147,7 @@ Purpose : This file contains the default values for emUSB-Device
 // Maximum number of Microsoft OS descriptors.
 //
 #ifndef   USB_MAX_NUM_MS_DESC
-  #define USB_MAX_NUM_MS_DESC   3u
+  #define USB_MAX_NUM_MS_DESC   USB_MAX_NUM_IF
 #endif
 
 //
@@ -155,7 +155,7 @@ Purpose : This file contains the default values for emUSB-Device
 // Normally one class component registers one EP0 receive callback.
 //
 #ifndef   USB_MAX_NUM_COMPONENTS
-  #define USB_MAX_NUM_COMPONENTS 4
+  #define USB_MAX_NUM_COMPONENTS  USB_MAX_NUM_IF
 #endif
 
 //

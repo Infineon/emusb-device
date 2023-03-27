@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -54,7 +54,7 @@ Contact to extend SUA:    sales@segger.com
 
 File    : SEGGER.h
 Purpose : Global types etc & general purpose utility functions.
-Revision: $Rev: 31082 $
+Revision: $Rev: 31583 $
 */
 
 #ifndef SEGGER_H            // Guard against multiple inclusion
@@ -124,9 +124,15 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
   #define SEGGER_USE_PARA(Para) (void)Para  // This works for most compilers.
 #endif
 
-#define SEGGER_ADDR2PTR(Type, Addr)  (/*lint -e(923) -e(9078)*/((Type*)((PTR_ADDR)(Addr))))    // Allow cast from address to pointer.
-#define SEGGER_PTR2ADDR(p)           (/*lint -e(923) -e(9078)*/((PTR_ADDR)(p)))                // Allow cast from pointer to address.
-#define SEGGER_PTR2PTR(Type, p)      (/*lint -e(740) -e(826) -e(9079) -e(9087)*/((Type*)(p)))  // Allow cast from one pointer type to another (ignore different size).
+#define SEGGER_ADDR2PTR(Type, Addr)  (/*lint -e(923) -e(9078)*/((Type*)((PTR_ADDR)(Addr))))                    // Allow cast from address to pointer.
+#define SEGGER_PTR2ADDR(p)           (/*lint -e(923) -e(9078)*/((PTR_ADDR)(p)))                                // Allow cast from pointer to address.
+#define SEGGER_PTR2PTR(Type, p)      (/*lint -e(740) -e(826) -e(9079) -e(9087)*/((Type*)((void*)(p))))         // Allow cast from one pointer type to another (ignore different size).
+                                                                                                               // Cast into void* first as some architectures/compilers might output
+                                                                                                               // a warning when casting from potentially unaligned types like U8 to
+                                                                                                               // higher aligned types (e.g. CC-RL compiler).
+#define SEGGER_CONSTPTR2PTR(Type, p)  (/*lint -e(740) -e(826) -e(9079) -e(9087)*/((Type*)((void const*)(p))))  // Allow cast from one pointer type to another (ignore different size).
+                                                                                                               // Same as SEGGER_PTR2PTR() but for const source pointers so the const
+                                                                                                               // modifier is not removed during the cast and causes a warning.
 #define SEGGER_PTR_DISTANCE(p0, p1)  (SEGGER_PTR2ADDR(p0) - SEGGER_PTR2ADDR(p1))
 
 /*********************************************************************

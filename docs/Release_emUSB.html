@@ -4,7 +4,7 @@
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>Release notes for emUSB-Device V3.52.2         </title>
+  <title>Release notes for emUSB-Device V3.58.0         </title>
   <meta name="robots" content="noindex,nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style type="text/css">
@@ -208,7 +208,7 @@
         <div class="claim">The Embedded Experts</div>
         <div class="head">
           <div class="container">
-            <h1>Release notes for emUSB-Device V3.52.2         </h1>
+            <h1>Release notes for emUSB-Device V3.58.0         </h1>
           </div>
         </div>
       </div>
@@ -216,6 +216,91 @@
     <!-- ****************************************************************** -->
     <!-- History                                                            -->
     <!-- ****************************************************************** -->
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.58.0 [28. Feb 2023]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>MTP: Added USBD_MTP_SetOperationCb() function which allows to set a callback which is called when objects are created/removed/renamed by the host.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>USB configurations with more than 16 endpoints did not work. Fixed.</li>
+            <li>PSoC6 driver: Data toggle bit was reset on suspend: Fixed.</li>
+            <li>PSoC6 driver: OUT packets with wrong PID are now handled correctly (ignored).</li>
+            <li>MTP: Storage was not re-mounted after a format operation. Fixed.</li>
+            <li>MTP: NULL pointer access was possible when a storage has been removed during "SendObject" operation handling. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.56.1 [16. Jan 2023]</h2>
+        <div>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MTP: An FS_VERSION check for the usage of a new FS function FS_BIGFAT_SetTime() was missing which caused linking issues with older emFile versions. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.56.0 [12. Jan 2023]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>PSoC6 driver: Add remote wakeup functionality.</li>
+            <li>Added new functions for LPM: USBD_SetBESLValues(), USBD_SetOnLPMChange().</li>
+            <li>Added new function USBD_GetDeviceState() which allows to retrieve the state of the USB device, set by the host.</li>
+            <li>Synopsys DWC2 driver: Support LPM change callbacks.</li>
+            <li>MTP: Added new storage layer for emFile's BigFAT. </li>
+            <li>MTP: Added USBD_MTP_RemoveStorage() function.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>MTP: There have been a few minor changes to the MTP storage layer API, if you have written your own storage layer you may need to update it.
+                <ul>
+                  <li>The type of the "Off" parameter in the USB_MTP_STORAGE_READ_FROM_FILE function has been changed from U32 to U64.</li>
+                  <li>The type of the "Off" parameter in the USB_MTP_STORAGE_WRITE_TO_FILE function has been changed from U32 to U64.</li>
+                  <li>The type of the "pFileSize" parameter in the USB_MTP_STORAGE_GET_FILE_SIZE function has been changed from U32* to U64*.</li>
+                  <li>An optional function was added - USB_MTP_STORAGE_GET_FILE_INFO, the pointer to this function can be set to NULL if you do not plan to implement it.</li>
+                </ul>
+            </li>
+            <li>MTP: Changed behavior of storage layer: it will no longer automatically mount the added volumes (old behavior can be restored by setting USB_MTP_OLD_MOUNTING_BEHAVIOR define).</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MTP: Errors during GetObject and SendObject on the filesystem side (e.g. user pulls the SD card) are now reported back to the PC correctly.</li>
+            <li>MTP: The format storage command would delete all objects from the object list, which caused problems for applications using multiple storage volumes. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.54.0 [7. Dec 2022]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for Microsemi Smartfusion2 devices.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>VirtualMSD: It's now possible to report write errors to the USB host.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>XMC45xx DMA driver: USB controller FIFO sizes were not set correctly. Fixed.</li>
+            <li>Synopsys DWC2 (no DMA) driver: When sending data to the host, bytes may be fetched from memory beyond the user buffer. Fixed.</li>
+            <li>MTP: Objects added to subfolders via events were added twice to the object list and would appear twice in windows explorer. Fixed.</li>
+            <li>MTP: The "Cancel Request" command was not handled correctly and could cause the MTP session to "hang". Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
     <div class="divider-global">
       <div class="container">
         <h2>Version 3.52.2 [25. Oct 2022]</h2>
@@ -1688,7 +1773,7 @@
   <div class="footer">
     <div class="container">
       <div>
-        <p>Copyright 2001-2022 SEGGER Microcontroller GmbH. All rights reserved.<br> For more information, please visit our website&nbsp;<a href="https://www.segger.com/" target="_blank">www.segger.com</a>&nbsp;or contact us via&nbsp;<a href="https://www.segger.com/ticket"
+        <p>Copyright 2001-2023 SEGGER Microcontroller GmbH. All rights reserved.<br> For more information, please visit our website&nbsp;<a href="https://www.segger.com/" target="_blank">www.segger.com</a>&nbsp;or contact us via&nbsp;<a href="https://www.segger.com/ticket"
             target="_blank">www.segger.com/ticket</a>&nbsp;</p>
       </div>
     </div>

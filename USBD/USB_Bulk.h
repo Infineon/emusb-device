@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -51,7 +51,6 @@ Support and Update Agreement (SUA)
 SUA period:               2022-05-12 - 2024-05-19
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
-File    : USB_Bulk.h
 Purpose : Public header of the bulk component
 -------------------------- END-OF-HEADER -----------------------------
 */
@@ -202,7 +201,8 @@ void            USBD_BULK_AddAlternateInterface(USB_BULK_HANDLE hInst, const USB
 
 /*********************************************************************
 *  End of Wrapper
-**********************************************************************/
+**********************************************************************
+*/
 
 #if defined(__cplusplus)
   }              /* Make sure we have C-declarations in C++ programs */

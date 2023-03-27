@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -52,25 +52,38 @@ SUA period:               2022-05-12 - 2024-05-19
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : usbd_os_abs_rtos.c
-Purpose     : OS Layer for the emUSB-Device in non-RTOS scenarios.
+Purpose     : OS Layer for the emUSB-Device. RTOS_AWARE component must be defined
+              additionally to enable OS functionality since the same file is
+              used in both RTOS and non-RTOS scenarios.
 ---------------------------END-OF-HEADER------------------------------
 */
 
-#if !defined(COMPONENT_RTOS_AWARE)
-
 #include "USB.h"
+
 /* For __get_IPSR() */
 #include "cy_pdl.h"
-
+#include "cyhal.h"
 
 #define USBD_NUM_ALL_EVENTS                      (USB_NUM_EPS + USB_EXTRA_EVENTS)
 
 static uint32_t critical_section_count;
 static volatile unsigned usbd_event_transact_cnt[USBD_NUM_ALL_EVENTS];
 
-static volatile bool usbd_event_transact_flag[USBD_NUM_ALL_EVENTS];
+#if defined(COMPONENT_RTOS_AWARE)
+#include "cyabs_rtos.h"
 
-#include "cyhal.h"
+#define TRANSACT_CNT_EVENT_BITS_MASK            (0x1U)
+
+static cy_mutex_t critical_section_mutex;
+static cy_event_t usbd_event[USBD_NUM_ALL_EVENTS];
+
+#if USB_NUM_MUTEXES > 0
+static cy_mutex_t mutex_list[USB_NUM_MUTEXES];
+static uint32_t mutex_num = 0U;
+#endif
+#else
+
+static volatile bool usbd_event_transact_flag[USBD_NUM_ALL_EVENTS];
 
 #if !defined (USBD_NORTOS_TICKCNT_ENABLE)
 #define USBD_NORTOS_TICKCNT_ENABLE              (1U)
@@ -81,10 +94,10 @@ static volatile bool usbd_event_transact_flag[USBD_NUM_ALL_EVENTS];
 static cy_rslt_t usbd_timer_config(void);
 static void isr_timer(void* callback_arg, cyhal_timer_event_t event);
 
-static uint32_t timer_tick_count;
 static cyhal_timer_t timer_obj;
-
+static volatile uint32_t timer_tick_count; /* The value in milliseconds */
 #endif /* (USBD_NORTOS_TICKCNT_ENABLE == 1U) */
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 
 
 /*********************************************************************
@@ -97,6 +110,20 @@ static cyhal_timer_t timer_obj;
 void USB_OS_Init(void)
 {
     critical_section_count = 0U;
+#if defined(COMPONENT_RTOS_AWARE)
+    cy_rslt_t result;
+
+    for (uint32_t i = 0U; i < USBD_NUM_ALL_EVENTS; i++)
+    {
+        result = cy_rtos_event_init(&usbd_event[i]);
+        CY_ASSERT(CY_RSLT_SUCCESS == result);
+    }
+
+    result = cy_rtos_init_mutex2(&critical_section_mutex, true);
+    CY_ASSERT(CY_RSLT_SUCCESS == result);
+
+    (void)result;  /* To avoid the compiler warning in Release mode */
+#else
 #if (USBD_NORTOS_TICKCNT_ENABLE == 1U)
     cy_rslt_t result;
     timer_tick_count = 0U;
@@ -110,6 +137,7 @@ void USB_OS_Init(void)
 
     (void)result;  /* To avoid the compiler warning in Release mode */
 #endif /* (USBD_NORTOS_TICKCNT_ENABLE == 1U) */
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 }
 
 /*********************************************************************
@@ -122,9 +150,24 @@ void USB_OS_Init(void)
 */
 void USB_OS_DeInit(void)
 {
+#if defined(COMPONENT_RTOS_AWARE)
+    cy_rslt_t result;
+
+    for (uint32_t i = 0U; i < USBD_NUM_ALL_EVENTS; i++)
+    {
+        result = cy_rtos_event_deinit(&usbd_event[i]);
+        CY_ASSERT(CY_RSLT_SUCCESS == result);
+    }
+
+    result = cy_rtos_deinit_mutex(&critical_section_mutex);
+    CY_ASSERT(CY_RSLT_SUCCESS == result);
+
+    (void)result;  /* To avoid the compiler warning in Release mode */
+#else
 #if (USBD_NORTOS_TICKCNT_ENABLE == 1U)
     cyhal_timer_free(&timer_obj);
 #endif /* (USBD_NORTOS_TICKCNT_ENABLE == 1U) */
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 }
 
 /*********************************************************************
@@ -139,7 +182,7 @@ void USB_OS_DeInit(void)
 */
 void USB_OS_Delay(int ms)
 {
-    cy_rslt_t result = cyhal_system_delay_ms((uint32_t)ms);
+    cy_rslt_t result = cyhal_system_delay_ms((uint32_t)ms);   
     CY_ASSERT(CY_RSLT_SUCCESS == result);
     (void)result;  /* To avoid the compiler warning in Release mode */
 }
@@ -180,6 +223,10 @@ void USB_OS_DecRI(void)
     /* Use mutex to allow/block critical_section_count variable incrementing
     * for other tasks
     */
+#if defined(COMPONENT_RTOS_AWARE)
+        cy_rslt_t result = cy_rtos_get_mutex(&critical_section_mutex, CY_RTOS_NEVER_TIMEOUT);
+        CY_ASSERT(CY_RSLT_SUCCESS == result);
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 
         /* Check if interrupt is already disabled */
         CY_ASSERT(0U != critical_section_count);
@@ -194,6 +241,11 @@ void USB_OS_DecRI(void)
     /* Use mutex to allow/block critical_section_count variable incrementing
     * for other tasks
     */
+#if defined(COMPONENT_RTOS_AWARE)
+        result = cy_rtos_set_mutex(&critical_section_mutex);
+        CY_ASSERT(CY_RSLT_SUCCESS == result);
+        (void)result;  /* To avoid the compiler warning in Release mode */
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
     }
 }
 
@@ -232,6 +284,10 @@ void USB_OS_IncDI(void)
     /* Use mutex to allow/block critical_section_count variable decrementing
     * for other tasks
     */
+#if defined(COMPONENT_RTOS_AWARE)
+        cy_rslt_t result = cy_rtos_get_mutex(&critical_section_mutex, CY_RTOS_NEVER_TIMEOUT);
+        CY_ASSERT(CY_RSLT_SUCCESS == result);
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 
         /* Disable the interrupt even if the RTOS is not used. */
         if (0U == critical_section_count)
@@ -243,6 +299,11 @@ void USB_OS_IncDI(void)
     /* Use mutex to allow/block critical_section_count variable decrementing
     * for other tasks
     */
+#if defined(COMPONENT_RTOS_AWARE)
+        result = cy_rtos_set_mutex(&critical_section_mutex);
+        CY_ASSERT(CY_RSLT_SUCCESS == result);
+        (void)result;  /* To avoid the compiler warning in Release mode */
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
     }
 }
 
@@ -263,8 +324,30 @@ void USB_OS_IncDI(void)
 */
 void USB_OS_Signal(unsigned EPIndex, unsigned TransactCnt)
 {
+#if defined(COMPONENT_RTOS_AWARE)
+    uint32_t bit = TRANSACT_CNT_EVENT_BITS_MASK;
+    cy_rslt_t result;
+    /* Update usbd_event_transact_cnt before setting of bits */
+    usbd_event_transact_cnt[EPIndex] = TransactCnt;
+    /* For Free-RTOS, the RTOS daemon task must have higher priority
+     * than other USB task, otherwise USB_OS_Signal() won't work
+     * correctly. Refer to xEventGroupSetBitsFromISR description of
+     * Free-RTOS API Reference.
+     */
+    result = cy_rtos_event_setbits(&usbd_event[EPIndex], bit);
+    CY_ASSERT(CY_RSLT_SUCCESS == result);
+    (void)result;  /* To avoid the compiler warning in Release mode */
+
+#if defined(COMPONENT_FREERTOS)
+    /* Always trigger context switching even if no tasks with higher
+     * priority which are preparing for execution
+     */
+    portYIELD_FROM_ISR(pdTRUE);
+#endif /* #if defined(COMPONENT_FREERTOS) */
+#else
     usbd_event_transact_cnt[EPIndex] = TransactCnt;
     usbd_event_transact_flag[EPIndex] = true;
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 }
 
 /*********************************************************************
@@ -286,6 +369,25 @@ void USB_OS_Signal(unsigned EPIndex, unsigned TransactCnt)
 */
 void USB_OS_Wait(unsigned EPIndex, unsigned TransactCnt)
 {
+#if defined(COMPONENT_RTOS_AWARE)
+
+    while (true)
+    {
+        uint32_t bits = TRANSACT_CNT_EVENT_BITS_MASK;
+        cy_rslt_t result = cy_rtos_event_waitbits(&usbd_event[EPIndex], &bits,
+                                                  true, false, CY_RTOS_NEVER_TIMEOUT);
+        CY_ASSERT(CY_RSLT_SUCCESS == result);
+        (void)result;  /* To avoid the compiler warning in Release mode */
+
+        /* Exit from USB_OS_Wait() only if signaling transaction is
+         * the same as TransactCnt, otherwise continue to wait.
+         */
+        if(usbd_event_transact_cnt[EPIndex] == TransactCnt)
+        {
+            break;
+        }
+    }
+#else
     while (true)
     {
         if (usbd_event_transact_flag[EPIndex])
@@ -301,6 +403,7 @@ void USB_OS_Wait(unsigned EPIndex, unsigned TransactCnt)
             }
         }
     }
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 }
 
 /*********************************************************************
@@ -333,50 +436,76 @@ void USB_OS_Wait(unsigned EPIndex, unsigned TransactCnt)
 */
 int USB_OS_WaitTimed(unsigned EPIndex, unsigned ms, unsigned TransactCnt)
 {
-    bool first_check = true;
-    /* Read current system time */
-    U32 tick_count_to_wait = USB_OS_GetTickCnt() + (U32) ms;
-    while (0U != ms)
+#if defined(COMPONENT_RTOS_AWARE)
+    int status = 1;
+    cy_rslt_t result;
+
+    /* It is expected that USB_OS_WaitTimed() waits longer than given timeout
+     * if cy_rtos_event_waitbits() return bits before timeout and returned
+     * transaction count will be different from TransactCnt
+     */
+    while (true)
     {
-        /* Do not wait 1 ms during first iteration of loop,
-         * because if this transaction was signaled before this function
-         * was called, it must return immediately
+        uint32_t bits = TRANSACT_CNT_EVENT_BITS_MASK;
+
+        result = cy_rtos_event_waitbits(&usbd_event[EPIndex], &bits,
+                                        true, false, (cy_time_t) ms);
+        /* CY_RSLT_SUCCESS and CY_RTOS_TIMEOUT are possible valid statuses.
+        * Other statuses are not expected and report about unexpected behavior
+        */
+        CY_ASSERT((CY_RSLT_SUCCESS == result) || (CY_RTOS_TIMEOUT == result));
+
+        /* Other statuses than CY_RSLT_SUCCESS mean Timeout or Error. In
+         * case of error the function must return timeout status
          */
-        if (first_check)
+        if (result == CY_RSLT_SUCCESS)
         {
-            first_check = false;
+            if(usbd_event_transact_cnt[EPIndex] == TransactCnt)
+            {
+                status = 0;
+                break;
+            }
         }
         else
         {
-            /* Wait 1 ms */
-            USB_OS_Delay(1);
-            ms--;
+            /* Status already equal 1 (Timeout occurred) */
+            break;
         }
+    }
+    return status;
+
+#else
+    U32 current_tick = USB_OS_GetTickCnt();
+    U32 tick_count_to_wait = current_tick + (U32) ms;
+    while (tick_count_to_wait >= current_tick)
+    {
         if (usbd_event_transact_flag[EPIndex])
         {
             usbd_event_transact_flag[EPIndex] = false;
 
-            /* Exit from USB_OS_WaitTimed() only if signaling transaction is
-             * the same as TransactCnt or timeout happens, otherwise continue to wait.
-             */
-            if(usbd_event_transact_cnt[EPIndex] == TransactCnt)
+            /* Exit from USB_OS_WaitTimed() if signaling transaction is
+            * the same as TransactCnt.
+            */
+            if (usbd_event_transact_cnt[EPIndex] == TransactCnt)
             {
                 break;
             }
         }
 
-        /* To avoid significant increasing the wait time by sum time of
-         * USB_OS_Delay() and time of execution code of another functions,
-         * additional check of delay by systime is used.
+        /* If signal transaction is not the same as TransactCnt when timeout
+         * equal zero, then exit at first cycle and assign to current_tick
+         * tick_count_to_wait value to return 1.
          */
-        if (tick_count_to_wait < USB_OS_GetTickCnt())
+        if (ms == 0U)
         {
-            ms = 0U;
+            current_tick = tick_count_to_wait + 1U;
             break;
         }
-    }
 
-    return (0U == ms) ? 1 : 0;
+        current_tick = USB_OS_GetTickCnt();
+    }
+    return ((tick_count_to_wait < current_tick) ? 1 : 0);
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 }
 
 /*********************************************************************
@@ -389,17 +518,26 @@ int USB_OS_WaitTimed(unsigned EPIndex, unsigned ms, unsigned TransactCnt)
 *  Return value
 *    Current system time.
 */
+#if defined(COMPONENT_RTOS_AWARE)
+U32 USB_OS_GetTickCnt(void)
+{
+    cy_time_t time;
+    cy_rslt_t result = cy_rtos_get_time(&time);
+    CY_ASSERT(CY_RSLT_SUCCESS == result);
+    (void)result;  /* To avoid the compiler warning in Release mode */
+    return (U32)time;
+}
+#else
 #if (USBD_NORTOS_TICKCNT_ENABLE == 1U)
 U32 USB_OS_GetTickCnt(void)
 {
-
     return (U32) timer_tick_count;
 }
 #endif /* (USBD_NORTOS_TICKCNT_ENABLE == 1U) */
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 
 
 #if (USBD_NORTOS_TICKCNT_ENABLE == 1U)
-
 /*********************************************************************
 *
 *        usbd_timer_config
@@ -482,7 +620,25 @@ static void isr_timer(void* callback_arg, cyhal_timer_event_t event)
 */
 int USB_OS_MutexAlloc(void)
 {
+#if defined(COMPONENT_RTOS_AWARE)
+    int status;
+
+    if (mutex_num < USB_NUM_MUTEXES)
+    {
+        cy_rslt_t result = cy_rtos_init_mutex2(&mutex_list[mutex_num], true);
+        CY_ASSERT(CY_RSLT_SUCCESS == result);
+        (void)result;  /* To avoid the compiler warning in Release mode */
+        status = (int)mutex_num;
+        mutex_num++;
+    }
+    else
+    {
+        status = -1;
+    }
+    return status;
+#else
     return -1;
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 }
 
 /*********************************************************************
@@ -494,6 +650,16 @@ int USB_OS_MutexAlloc(void)
 */
 void USB_OS_MutexFree(void)
 {
+#if defined(COMPONENT_RTOS_AWARE)
+    for (uint32_t i = 0U; i < USB_NUM_MUTEXES; i++)
+    {
+        cy_rslt_t result = cy_rtos_deinit_mutex(&mutex_list[i]);
+        CY_ASSERT(CY_RSLT_SUCCESS == result);
+        (void)result;  /* To avoid the compiler warning in Release mode */
+    }
+    mutex_num = 0U;
+#else
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 }
 
 /*********************************************************************
@@ -508,7 +674,13 @@ void USB_OS_MutexFree(void)
 */
 void USB_OS_MutexLock(int Idx)
 {
+#if defined(COMPONENT_RTOS_AWARE)
+    cy_rslt_t result = cy_rtos_get_mutex(&mutex_list[Idx], CY_RTOS_NEVER_TIMEOUT);
+    CY_ASSERT(CY_RSLT_SUCCESS == result);
+    (void)result;  /* To avoid the compiler warning in Release mode */
+#else
     (void)Idx;
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 }
 
 /*********************************************************************
@@ -523,10 +695,15 @@ void USB_OS_MutexLock(int Idx)
 */
 void USB_OS_MutexUnlock(int Idx)
 {
+#if defined(COMPONENT_RTOS_AWARE)
+    cy_rslt_t result = cy_rtos_set_mutex(&mutex_list[Idx]);
+    CY_ASSERT(CY_RSLT_SUCCESS == result);
+    (void)result;  /* To avoid the compiler warning in Release mode */
+#else
     (void)Idx;
+#endif /* #if defined(COMPONENT_RTOS_AWARE) */
 }
 
 #endif /* USB_NUM_MUTEXES > 0 */
 
-#endif /* #if !defined(COMPONENT_RTOS_AWARE) */
 /*************************** End of file ****************************/

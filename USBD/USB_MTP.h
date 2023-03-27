@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -51,9 +51,8 @@ Support and Update Agreement (SUA)
 SUA period:               2022-05-12 - 2024-05-19
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
-File    : USB_MTP.h
 Purpose : Public header of USB MTP (Media Transfer Protocol)
---------  END-OF-HEADER  ---------------------------------------------
+-------------------------- END-OF-HEADER -----------------------------
 */
 
 #ifndef USBD_MTP_H          /* Avoid multiple inclusion */
@@ -117,6 +116,17 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 
 #ifndef   USB_MTP_SUPPORT_SEGGER_CMD
   #define USB_MTP_SUPPORT_SEGGER_CMD    0   // Enables custom read and write commands to be used over the MTP protocol.
+#endif
+
+#ifndef   USB_MTP_OLD_MOUNTING_BEHAVIOR
+  #define USB_MTP_OLD_MOUNTING_BEHAVIOR    0    // Defines whether to use the old mounting behavior
+                                                // With version V3.54.0 and older the MTP Storage layer for emFile would automatically call FS_Mount.
+                                                // 0 - Do not automatically call FS_Mount - volume must be mounted by the application.
+                                                // 1 - Call FS_Mount automatically.
+#endif
+
+#ifndef   USB_MTP_SUPPORT_OPERATION_CB
+  #define USB_MTP_SUPPORT_OPERATION_CB  0   // Enable support for MTP operation notifications.
 #endif
 
 /*********************************************************************
@@ -190,6 +200,22 @@ typedef enum _USB_MTP_EVENT {
 
 /*********************************************************************
 *
+*       USB_MTP_OPERATION_CB_TYPE
+*
+*  Description
+*    Enum containing the callback operation types.
+*/
+#if USB_MTP_SUPPORT_OPERATION_CB
+typedef enum _USB_MTP_OPERATION_CB_TYPE {
+  USB_MTP_OPERATION_OBJECT_ADDED,             // A new object has been added.
+  USB_MTP_OPERATION_OBJECT_REMOVED,           // An object is about to be removed.
+  USB_MTP_OPERATION_OBJECT_RENAMED_OLD_NAME,  // An object is being renamed - old name of the object.
+  USB_MTP_OPERATION_OBJECT_RENAMED_NEW_NAME   // An object is being renamed - new name of the object.
+} USB_MTP_OPERATION_CB_TYPE; /*lint !e621 N:100 */
+#endif
+
+/*********************************************************************
+*
 *       USB_MTP_INST_DATA_DRIVER
 *
 *  Description
@@ -217,6 +243,7 @@ typedef struct USB_MTP_STORAGE_INFO {
   U8   IsWriteProtected;          // Set to 1 if the storage medium can not be modified
   U8   IsRemovable;               // Set to 1 if the storage medium can be removed from device
   char DirDelimiter;              // Character which separates the directory/file names in a path
+  U8   BigFileSupport;            // Store layer should set this to 1 if it supports files > 4GB.
 } USB_MTP_STORAGE_INFO;
 
 /*********************************************************************
@@ -229,7 +256,7 @@ typedef struct USB_MTP_STORAGE_INFO {
 typedef struct USB_MTP_FILE_INFO {
   const char * pFilePath;         // Full path to file.
   const char * pFileName;         // Pointer to beginning of file/directory name in pFilePath.
-  U32    FileSize;                // Size of the file in bytes. 0xFFFFFFFF when larger than 4GB.
+  U64    FileSize;                // Size of the file in bytes.
   U32    CreationTime;            // The time and date when the file was created.
   U32    LastWriteTime;           // The time and date when the file was last modified.
   U8     IsDirectory;             // Set to 1 if the path points to a directory.
@@ -237,10 +264,19 @@ typedef struct USB_MTP_FILE_INFO {
   U8     acId[MTP_NUM_BYTES_FILE_ID]; // Unique identifier which persists between MTP sessions.
 } USB_MTP_FILE_INFO;
 
-typedef struct _USB_MTP_STRING {
-  U32 NumBytes;
-  char * sString;
-} USB_MTP_STRING;
+/*********************************************************************
+*
+*       USB_MTP_OPERATION_INFO
+*
+*  Description
+*    Structure which provides information about a new MTP operation.
+*/
+#if USB_MTP_SUPPORT_OPERATION_CB
+typedef struct USB_MTP_OPERATION_INFO {
+  const char * pFilePath;         // Full path to file.
+  U8           IsDirectory;       // Set to 1 if the path points to a directory.
+} USB_MTP_OPERATION_INFO;
+#endif
 
 /*********************************************************************
 *
@@ -536,8 +572,15 @@ typedef enum _USB_MTP_RESPONSE_CODES {
   USB_MTP_RESPONSE_SESSION_ALREADY_OPEN                   = 0x201Eu,
   USB_MTP_RESPONSE_TRANSACTION_CANCELLED                  = 0x201Fu,
   USB_MTP_RESPONSE_INVALID_OBJECT_PROP_CODE               = 0xA801u,
+  USB_MTP_RESPONSE_INVALID_OBJECTPROP_FORMAT              = 0xA802u,
+  USB_MTP_RESPONSE_INVALID_OBJECTPROP_VALUE               = 0xA803u,
+  USB_MTP_RESPONSE_INVALID_OBJECTREFERENCE                = 0xA804u,
+  USB_MTP_RESPONSE_INVALID_DATASET                        = 0xA806u,
   USB_MTP_RESPONSE_SPECIFICATION_BY_GROUP_UNSUPPORTED     = 0xA807u,
-  USB_MTP_RESPONSE_OBJECT_PROP_NOT_SUPPORTED              = 0xA80Au
+  USB_MTP_RESPONSE_SPECIFICATION_BY_DEPTH_UNSUPPORTED     = 0xA808u,
+  USB_MTP_RESPONSE_OBJECT_TOO_LARGE                       = 0xA809u,
+  USB_MTP_RESPONSE_OBJECT_PROP_NOT_SUPPORTED              = 0xA80Au,
+  USB_MTP_RESPONSE_GROUP_NOT_SUPPORTED                    = 0xA805u
 } USB_MTP_RESPONSE_CODES;                                 /*lint !e621 N:100 */
 
 /*********************************************************************
@@ -608,7 +651,7 @@ typedef enum _USB_MTP_OBJECT_FORMAT {
 *    This function is called when the storage driver is added to emUSB-Device-MTP.
 *    It is the first function of the storage driver to be called.
 */
-typedef void (USB_MTP_STORAGE_INIT)                   (U8 Unit, const USB_MTP_INST_DATA_DRIVER * pDriverData);
+typedef void (USB_MTP_STORAGE_INIT) (U8 Unit, const USB_MTP_INST_DATA_DRIVER * pDriverData);
 
 /*********************************************************************
 *
@@ -626,7 +669,7 @@ typedef void (USB_MTP_STORAGE_INIT)                   (U8 Unit, const USB_MTP_IN
 *    Typically, this function is called immediately after the device is connected
 *    to USB host when the USB host requests information about the available storage mediums.
 */
-typedef void (USB_MTP_STORAGE_GET_INFO)               (U8 Unit, USB_MTP_STORAGE_INFO * pStorageInfo);
+typedef void (USB_MTP_STORAGE_GET_INFO) (U8 Unit, USB_MTP_STORAGE_INFO * pStorageInfo);
 
 /*********************************************************************
 *
@@ -648,7 +691,7 @@ typedef void (USB_MTP_STORAGE_GET_INFO)               (U8 Unit, USB_MTP_STORAGE_
 *  Additional information
 *    The "." and ".." directory entries which are relevant only for the file system should be skipped.
 */
-typedef int  (USB_MTP_STORAGE_FIND_FIRST_FILE)        (U8 Unit, const char * pDirPath, USB_MTP_FILE_INFO * pFileInfo);
+typedef int (USB_MTP_STORAGE_FIND_FIRST_FILE) (U8 Unit, const char * pDirPath, USB_MTP_FILE_INFO * pFileInfo);
 
 /*********************************************************************
 *
@@ -669,7 +712,7 @@ typedef int  (USB_MTP_STORAGE_FIND_FIRST_FILE)        (U8 Unit, const char * pDi
 *  Additional information
 *    The "." and ".." directory entries which are relevant only for the file system should be skipped.
 */
-typedef int  (USB_MTP_STORAGE_FIND_NEXT_FILE)         (U8 Unit, USB_MTP_FILE_INFO * pFileInfo);
+typedef int (USB_MTP_STORAGE_FIND_NEXT_FILE) (U8 Unit, USB_MTP_FILE_INFO * pFileInfo);
 
 /*********************************************************************
 *
@@ -693,7 +736,7 @@ typedef int  (USB_MTP_STORAGE_FIND_NEXT_FILE)         (U8 Unit, USB_MTP_FILE_INF
 *    If the file does not exists an error should be returned.
 *    The MTP module opens only one file at a time.
 */
-typedef int  (USB_MTP_STORAGE_OPEN_FILE)              (U8 Unit, const char * pFilePath);
+typedef int (USB_MTP_STORAGE_OPEN_FILE) (U8 Unit, const char * pFilePath);
 
 /*********************************************************************
 *
@@ -721,7 +764,7 @@ typedef int  (USB_MTP_STORAGE_OPEN_FILE)              (U8 Unit, const char * pFi
 *    If CreationTime and LastWriteTime in pFileInfo are not zero,
 *    these should be used instead of the time stamps generated by the file system.
 */
-typedef int  (USB_MTP_STORAGE_CREATE_FILE)            (U8 Unit, const char * pDirPath, USB_MTP_FILE_INFO * pFileInfo);
+typedef int (USB_MTP_STORAGE_CREATE_FILE) (U8 Unit, const char * pDirPath, USB_MTP_FILE_INFO * pFileInfo);
 
 /*********************************************************************
 *
@@ -743,7 +786,7 @@ typedef int  (USB_MTP_STORAGE_CREATE_FILE)            (U8 Unit, const char * pDi
 *  Additional information
 *    The function reads data from the file opened by USB_MTP_STORAGE_OPEN_FILE.
 */
-typedef int  (USB_MTP_STORAGE_READ_FROM_FILE)         (U8 Unit, U32 Off, void * pData, U32 NumBytes);
+typedef int (USB_MTP_STORAGE_READ_FROM_FILE) (U8 Unit, U64 Off, void * pData, U32 NumBytes);
 
 /*********************************************************************
 *
@@ -765,7 +808,7 @@ typedef int  (USB_MTP_STORAGE_READ_FROM_FILE)         (U8 Unit, U32 Off, void * 
 *  Additional information
 *    The function writes data to file opened by USB_MTP_STORAGE_CREATE_FILE.
 */
-typedef int  (USB_MTP_STORAGE_WRITE_TO_FILE)          (U8 Unit, U32 Off, const void * pData, U32 NumBytes);
+typedef int (USB_MTP_STORAGE_WRITE_TO_FILE) (U8 Unit, U64 Off, const void * pData, U32 NumBytes);
 
 /*********************************************************************
 *
@@ -784,7 +827,7 @@ typedef int  (USB_MTP_STORAGE_WRITE_TO_FILE)          (U8 Unit, U32 Off, const v
 *  Additional information
 *    The function closes the file opened by USB_MTP_STORAGE_CREATE_FILE or USB_MTP_STORAGE_OPEN_FILE.
 */
-typedef int  (USB_MTP_STORAGE_CLOSE_FILE)             (U8 Unit);
+typedef int (USB_MTP_STORAGE_CLOSE_FILE) (U8 Unit);
 
 /*********************************************************************
 *
@@ -801,7 +844,7 @@ typedef int  (USB_MTP_STORAGE_CLOSE_FILE)             (U8 Unit);
 *    == 0: File removed.
 *    != 0: An error occurred
 */
-typedef int  (USB_MTP_STORAGE_REMOVE_FILE)            (U8 Unit, const char * pFilePath);
+typedef int (USB_MTP_STORAGE_REMOVE_FILE) (U8 Unit, const char * pFilePath);
 
 /*********************************************************************
 *
@@ -824,7 +867,7 @@ typedef int  (USB_MTP_STORAGE_REMOVE_FILE)            (U8 Unit, const char * pFi
 *    If CreationTime and LastWriteTime in pFileInfo are not available,
 *    zero should be used instead of the time stamps generated by the file system.
 */
-typedef int  (USB_MTP_STORAGE_CREATE_DIR)             (U8 Unit, const char * pDirPath, USB_MTP_FILE_INFO * pFileInfo);
+typedef int (USB_MTP_STORAGE_CREATE_DIR) (U8 Unit, const char * pDirPath, USB_MTP_FILE_INFO * pFileInfo);
 
 /*********************************************************************
 *
@@ -844,7 +887,7 @@ typedef int  (USB_MTP_STORAGE_CREATE_DIR)             (U8 Unit, const char * pDi
 *  Additional information
 *    The function should remove the directory and the entire file tree under it.
 */
-typedef int  (USB_MTP_STORAGE_REMOVE_DIR)             (U8 Unit, const char * pDirPath);
+typedef int (USB_MTP_STORAGE_REMOVE_DIR) (U8 Unit, const char * pDirPath);
 
 /*********************************************************************
 *
@@ -869,7 +912,7 @@ typedef int  (USB_MTP_STORAGE_REMOVE_DIR)             (U8 Unit, const char * pDi
 *    the storage medium should not be formatted.
 *    Instead, all the files and directories underneath pRootDir should be removed.
 */
-typedef int  (USB_MTP_STORAGE_FORMAT)                 (U8 Unit);
+typedef int (USB_MTP_STORAGE_FORMAT) (U8 Unit);
 
 /*********************************************************************
 *
@@ -895,7 +938,7 @@ typedef int  (USB_MTP_STORAGE_FORMAT)                 (U8 Unit);
 *    Only the name of the file/directory should be changed.
 *    The path to parent directory should remain the same.
 */
-typedef int  (USB_MTP_STORAGE_RENAME_FILE)            (U8 Unit, USB_MTP_FILE_INFO * pFileInfo);
+typedef int (USB_MTP_STORAGE_RENAME_FILE) (U8 Unit, USB_MTP_FILE_INFO * pFileInfo);
 
 /*********************************************************************
 *
@@ -911,7 +954,7 @@ typedef int  (USB_MTP_STORAGE_RENAME_FILE)            (U8 Unit, USB_MTP_FILE_INF
 *    Typically called when the application calls USBD_Stop()
 *    to de-initialize emUSB-Device.
 */
-typedef void (USB_MTP_STORAGE_DEINIT)                 (U8 Unit);
+typedef void (USB_MTP_STORAGE_DEINIT) (U8 Unit);
 
 /*********************************************************************
 *
@@ -933,7 +976,7 @@ typedef void (USB_MTP_STORAGE_DEINIT)                 (U8 Unit);
 *    This function is called only when the compile time switch MTP_SAVE_FILE_INFO is set to 0.
 *    For the list of supported attributes refer to USB_MTP_FILE_INFO.
 */
-typedef int  (USB_MTP_STORAGE_GET_FILE_ATTRIBUTES)    (U8 Unit, const char * pFilePath, U8 * pMask);
+typedef int (USB_MTP_STORAGE_GET_FILE_ATTRIBUTES) (U8 Unit, const char * pFilePath, U8 * pMask);
 
 /*********************************************************************
 *
@@ -955,7 +998,7 @@ typedef int  (USB_MTP_STORAGE_GET_FILE_ATTRIBUTES)    (U8 Unit, const char * pFi
 *  Additional information
 *    For the list of supported attributes refer to USB_MTP_FILE_INFO.
 */
-typedef int  (USB_MTP_STORAGE_MODIFY_FILE_ATTRIBUTES) (U8 Unit, const char * pFilePath, U8 SetMask, U8 ClrMask);
+typedef int (USB_MTP_STORAGE_MODIFY_FILE_ATTRIBUTES) (U8 Unit, const char * pFilePath, U8 SetMask, U8 ClrMask);
 
 /*********************************************************************
 *
@@ -977,7 +1020,7 @@ typedef int  (USB_MTP_STORAGE_MODIFY_FILE_ATTRIBUTES) (U8 Unit, const char * pFi
 *    This function is called only when the compile time switch MTP_SAVE_FILE_INFO is set to 0.
 *    For the list of supported attributes refer to USB_MTP_FILE_INFO.
 */
-typedef int  (USB_MTP_STORAGE_GET_FILE_CREATION_TIME) (U8 Unit, const char * pFilePath, U32 * pTime);
+typedef int (USB_MTP_STORAGE_GET_FILE_CREATION_TIME) (U8 Unit, const char * pFilePath, U32 * pTime);
 
 /*********************************************************************
 *
@@ -999,7 +1042,7 @@ typedef int  (USB_MTP_STORAGE_GET_FILE_CREATION_TIME) (U8 Unit, const char * pFi
 *    This function is called only when the compile time switch MTP_SAVE_FILE_INFO is set to 0.
 *    For the list of supported attributes refer to USB_MTP_FILE_INFO.
 */
-typedef int  (USB_MTP_STORAGE_GET_FILELAST_WRITE_TIME)(U8 Unit, const char * pFilePath, U32 * pTime);
+typedef int (USB_MTP_STORAGE_GET_FILELAST_WRITE_TIME) (U8 Unit, const char * pFilePath, U32 * pTime);
 
 /*********************************************************************
 *
@@ -1018,7 +1061,7 @@ typedef int  (USB_MTP_STORAGE_GET_FILELAST_WRITE_TIME)(U8 Unit, const char * pFi
 *    == 0: ID returned.
 *    != 0: An error occurred
 */
-typedef int  (USB_MTP_STORAGE_GET_FILE_ID)            (U8 Unit, const char * pFilePath, U8  * pId);
+typedef int (USB_MTP_STORAGE_GET_FILE_ID) (U8 Unit, const char * pFilePath, U8  * pId);
 
 /*********************************************************************
 *
@@ -1039,7 +1082,31 @@ typedef int  (USB_MTP_STORAGE_GET_FILE_ID)            (U8 Unit, const char * pFi
 *  Additional information
 *    This function is called only when the compile time switch MTP_SAVE_FILE_INFO is set to 0.
 */
-typedef int  (USB_MTP_STORAGE_GET_FILE_SIZE)          (U8 Unit, const char * pFilePath, U32 * pFileSize);
+typedef int (USB_MTP_STORAGE_GET_FILE_SIZE) (U8 Unit, const char * pFilePath, U64 * pFileSize);
+
+/*********************************************************************
+*
+*       USB_MTP_STORAGE_GET_FILE_INFO
+*
+*  Description
+*    This function is optional. It is used to speed up retrieval of file information.
+*    Returns the creation time, modification time and attributes in one call.
+*
+*  Parameters
+*    Unit           : Logical unit number. Specifies for which storage medium the function is called.
+*    pFilePath      : Path to file or directory.
+*    pCreationTime  : [OUT] The creation time.
+*    pLastWriteTime : [OUT] The modification time.
+*    pAttributes    : [OUT] The size of file in bytes.
+*
+*  Return value
+*    == 0: Operation retrieved information successfully.
+*    != 0: An error occurred
+*
+*  Additional information
+*    This function is called only when the compile time switch MTP_SAVE_FILE_INFO is set to 0.
+*/
+typedef int (USB_MTP_STORAGE_GET_FILE_INFO) (U8 Unit, const char * pFilePath, U32 * pCreationTime, U32 * pLastWriteTime, U64 * pFileSize, U8 * pAttributes);
 
 /*********************************************************************
 *
@@ -1058,7 +1125,7 @@ typedef int  (USB_MTP_STORAGE_GET_FILE_SIZE)          (U8 Unit, const char * pFi
 *
 *  Additional information
 *    This callback is informative only, the application must not try to free the object list.
-*    This callback is called for every objects where allocation failed.
+*    This callback is called for every object where allocation failed.
 *    The callback may not block.
 *    When this callback is set the behavior of the MTP module is changed slightly -
 *    new objects are normally allocated for each file/dir in a directory which is
@@ -1071,6 +1138,24 @@ typedef int  (USB_MTP_STORAGE_GET_FILE_SIZE)          (U8 Unit, const char * pFi
 *    will return the first 40 objects to the PC).
 */
 typedef void (USB_MTP_OBJECT_ALLOC_FAIL) (U32 NumBytesRequested, U32 NumBytesAvail, const char * pFilePath, const char * pFileName);
+
+/*********************************************************************
+*
+*       USB_MTP_OPERATION_CB
+*
+*  Description
+*    Callback which can be set via USBD_MTP_SetOperationCb().
+*    This callback is called when operations are executed by the host
+*    operating system via MTP.
+*    This can be used to e.g. monitor new objects being created.
+*
+*  Parameters
+*    OperationType: One of the USB_MTP_OPERATION_CB_TYPE enum values.
+*    pFileInfo    : Pointer to a USB_MTP_OPERATION_INFO structure containing information about the affected file.
+*/
+#if USB_MTP_SUPPORT_OPERATION_CB
+typedef void (USB_MTP_OPERATION_CB) (USB_MTP_OPERATION_CB_TYPE OperationType, const USB_MTP_OPERATION_INFO * pOpInfo);
+#endif
 
 /*********************************************************************
 *
@@ -1102,6 +1187,7 @@ typedef struct USB_MTP_STORAGE_API {
   USB_MTP_STORAGE_GET_FILELAST_WRITE_TIME * pfGetFileLastWriteTime; // Returns the time of the last modification made to a file or directory.
   USB_MTP_STORAGE_GET_FILE_ID             * pfGetFileId;            // Returns the unique ID of a file or directory.
   USB_MTP_STORAGE_GET_FILE_SIZE           * pfGetFileSize;          // Returns the size of a file in bytes.
+  USB_MTP_STORAGE_GET_FILE_INFO           * pfGetFileInfo;          // [Optional] Returns information about a file.
 } USB_MTP_STORAGE_API;
 
 /*********************************************************************
@@ -1168,7 +1254,7 @@ typedef struct USB_MTP_INFO {
 *    is assigned to each file/directory when the USB host requests
 *    the object information for the first time.
 */
-typedef struct {
+typedef struct {                  // NOLINT(clang-analyzer-optin.performance.Padding)
   U8     EPIn;                    // Endpoint for receiving data from host.
   U8     EPOut;                   // Endpoint for sending data to host.
   U8     EPInt;                   // Endpoint for sending events to host.
@@ -1185,8 +1271,6 @@ typedef struct {
   U32    NumObjects;
 } USB_MTP_INIT_DATA;
 
-//tidy ignore-padding:USB_MTP_INIT_DATA
-
 /*********************************************************************
 *
 *       USB_MTP_STORAGE_HANDLE
@@ -1202,10 +1286,14 @@ typedef U32 USB_MTP_STORAGE_HANDLE;
 void                    USBD_MTP_Init                 (void);
 int                     USBD_MTP_Add                  (const USB_MTP_INIT_DATA * pInitData);
 USB_MTP_STORAGE_HANDLE  USBD_MTP_AddStorage           (const USB_MTP_INST_DATA * pInstData);
+int                     USBD_MTP_RemoveStorage        (USB_MTP_STORAGE_HANDLE hStorage);
 int                     USBD_MTP_Poll                 (void);
 void                    USBD_MTP_Task                 (void);
 int                     USBD_MTP_SendEvent            (USB_MTP_STORAGE_HANDLE hStorage, USB_MTP_EVENT Event, void * pPara);
 void                    USBD_MTP_SetObjectAllocFailCb (USB_MTP_OBJECT_ALLOC_FAIL * pf);
+#if USB_MTP_SUPPORT_OPERATION_CB
+void                    USBD_MTP_SetOperationCb       (USB_MTP_OPERATION_CB * pf);
+#endif
 
 /*********************************************************************
 *
@@ -1233,6 +1321,7 @@ const char * USB_MTP_GetModel        (void);
 const char * USB_MTP_GetDeviceVersion(void);
 const char * USB_MTP_GetSerialNumber (void);
 #endif
+
 /*********************************************************************
 *
 *       Storage drivers
@@ -1240,6 +1329,7 @@ const char * USB_MTP_GetSerialNumber (void);
 **********************************************************************
 */
 extern const USB_MTP_STORAGE_API USB_MTP_StorageFS;
+extern const USB_MTP_STORAGE_API USB_MTP_StorageFS_BIGFAT;
 
 /*********************************************************************
 *

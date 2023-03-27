@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -51,9 +51,8 @@ Support and Update Agreement (SUA)
 SUA period:               2022-05-12 - 2024-05-19
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
-File    : USB_VirtualMSD.h
 Purpose : USB_VirtualMSD API specification
---------- END-OF-HEADER ----------------------------------------------
+-------------------------- END-OF-HEADER -----------------------------
 */
 
 #ifndef USB_VMSD_H            // Avoid multiple inclusion
@@ -233,15 +232,21 @@ typedef int    (USB_VMSD_ON_READ_FUNC)(unsigned Lun, U8 * pData, U32 Off, U32 Nu
 *
 *  Parameters
 *    Lun          : Zero-based index for the unit number.
-                    Using only one virtual volume, this parameter is 0.
+*                   Using only one virtual volume, this parameter is 0.
 *    pData        : Pointer to the data to be written (received from the host).
+*                   If pData == NULL, then there are no data written by the host,
+*                   but instead a new or changed directory entry was written,
+*                   which is provided via pFile.
 *    Off          : Offset in the file which the host writes.
 *    NumBytes     : Amount of bytes to write.
-*    pFile        : Pointer to a USB_VMSD_FILE_INFO structure describing the file.
+*    pFile        : Pointer to a USB_VMSD_FILE_INFO structure describing the file or NULL.
 *
 *  Return value
 *    == 0:   Success.
-*    != 0:   An error occurred.
+*    == 1:   Enable continuous sector mode: From now on, only forward writes to continuous
+*            sectors to the user callback. Ignore writes to all other sectors.
+*    == -1:  Disable continuous sector mode.
+*    == -2:  Report write error to USB host.
 *
 *  Additional information
 *    Depending on the behavior of the host operating system it is possible that pFile is
@@ -264,6 +269,7 @@ typedef int    (USB_VMSD_ON_WRITE_FUNC)(unsigned Lun, const U8   * pData, U32 Of
 *    Pointer to the allocated memory or NULL.
 */
 typedef void * (USB_VMSD_MEM_ALLOC)(U32 Size);
+
 /*********************************************************************
 *
 *       USB_VMSD_MEM_FREE
@@ -355,7 +361,8 @@ void USB_VMSD_X_Config               (void);    // Has to be defined by user
 
 /*********************************************************************
 *  End of Wrapper
-**********************************************************************/
+**********************************************************************
+*/
 
 #if defined(__cplusplus)
   }              /* Make sure we have C-declarations in C++ programs */

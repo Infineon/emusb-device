@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -52,7 +52,7 @@ SUA period:               2022-05-12 - 2024-05-19
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 Purpose : Private USB include file.
---------  END-OF-HEADER  ---------------------------------------------
+-------------------------- END-OF-HEADER -----------------------------
 */
 
 #ifndef USB_PRIVATE_H
@@ -252,7 +252,11 @@ typedef struct _USB_DEINIT_HOOK {
 } USB_DEINIT_HOOK;
 
 typedef struct _INTERFACE {
+#if USB_NUM_EPS > 16u
+  U32                       EPs;
+#else
   U16                       EPs;
+#endif
   U8                        IFAlternateSetting;  // Applicable for ALT_INTERFACE, value is used in descriptor creation.
   U8                        IFClass;             // Interface Class
   U8                        IFSubClass;          // Interface Subclass
@@ -306,7 +310,7 @@ typedef struct {
 U32  USBD_PROFILE_GetAPIDesc(const char** psDesc);
 void USBD_PROFILE_SetAPI(const USBD_PROFILE_API* pAPI, U32 IdOffset);
 
-typedef struct {
+typedef struct {                                  // NOLINT(clang-analyzer-optin.performance.Padding)
   U8                        NumEPs;               // Count of currently used endpoints.
   U8                        NumIFs;               // Count of currently used interfaces.
   U8                        NumAltIFs;            // Count of currently used alternative interfaces.
@@ -320,13 +324,10 @@ typedef struct {
   U8                        Addr;                 // The USB device address, assigned by the host. Zero when the device is not enumerated.
   U8                        ConfigAttr;           // For use in configuration descriptor.
   U8                        DeviceState;          // Device state returned by 'Get Status' request from the host.
-                                                  // Bit 0: Self powered
-                                                  // Bit 1: Remote Wakeup allowed (set by host)
-                                                  // Bit 2: U1 Enable (SS only)
-                                                  // Bit 3: U2 Enable (SS only)
-                                                  // Bit 4: LPM Enable (SS only)
+                                                  // See USB_DEVSTAT_... macros.
   U8                        NumStringDesc;        // Number of String descriptors
   U8                        NumOnRxEP0Callbacks;  // Count of receive callbacks for endpoint zero.
+  U16                       RecommendedBESLValue;
   USB_DRIVER_FLAGS          Flags;                // Driver dependent flags
   const char *              aStringDesc[USB_MAX_STRING_DESC];
   INTERFACE                 aIF[USB_MAX_NUM_IF];  // Array of available interfaces.
@@ -349,6 +350,7 @@ typedef struct {
   const USB_DEVICE_INFO   * pDeviceInfo;          // Pointer to device information used during enumeration.
   U8                        aPhyAddr2EPIndex[USB_MAX_ALLOWED_EPADDR];  // Mapping table, physical to logical endpoint address.
   USB_HOOK                * pFirstSCHook;         // List of hook function called on status change.
+  USB_ON_LPM_CHANGE       * pfOnLPMChange;        // LPM callback
   SEGGER_CACHE_CONFIG       CacheConfig;
   const U8 *             (* pfBuildBOSDesc)(void);
   void                   (* pfAddSSEndpointCompanion)(const EP_STAT *pEPStat, USB_INFO_BUFFER *pInfoBuffer);
@@ -366,8 +368,6 @@ typedef struct {
 #endif
   const char              * sCopyright;
 } USBD_GLOBAL;
-
-//tidy ignore-padding:USBD_GLOBAL
 
 enum _STRING_INDEX {
   STRING_INDEX_LANGUAGE = 0,  // Language index. MUST BE 0 acc. to spec.
@@ -634,7 +634,6 @@ void     USB__OnResume              (void);
 void     USB__OnRx                  (unsigned EPIndex, const U8 * pData, unsigned NumBytes);
 void     USB__OnRxZeroCopy          (unsigned EPIndex, unsigned NumBytes);
 void     USB__OnRxZeroCopyEx        (unsigned EPIndex, unsigned NumBytes, int Done);
-void     USB__OnSetupCancel         (void);
 void     USB__OnStatusChange        (U8 NewState);
 void     USB__OnSuspend             (void);
 void     USB__OnTx                  (unsigned EPIndex);
@@ -656,6 +655,7 @@ U8   *   USB__GetDescBuffer         (unsigned * pDescBufferSize);
 unsigned USB__AddPlatformDesc       (USB_INFO_BUFFER *pInfoBuffer);
 void     USB__RegisterDeInitHandler (USB_DEINIT_HOOK *pHook, USB_DEINIT_FUNC * pfHandler);
 void     USB__RegisterDeInitFlag    (USB_DEINIT_HOOK *pHook, U8 *pFlag);
+void     USB__OnLPMChange           (int State, unsigned BESL);
 
 //lint -sem(USB__EPIndex2Addr, pure)          N:100
 //lint -sem(USB__GetSpeedCapability, pure)    N:100

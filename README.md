@@ -13,6 +13,7 @@
 * No custom USB host driver necessary
 
 ### Supported USB Device Classes:
+* Audio V1 device class
 * Bulk communication
 * Communication Device Class (CDC)
 * Human Interface Device Class (HID)
@@ -44,4 +45,4 @@ For more information, refer to the following documents:
 * [Infineon Technologies AG](https://www.infineon.com)
 
 ---
-© 2022, Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation.
+© 2022-2023, Cypress Semiconductor Corporation (an Infineon company) or an affiliate of Cypress Semiconductor Corporation.

@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -73,7 +73,7 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 */
 
 /* USB system version */
-#define USB_VERSION  35202uL // Format: Mmmrr Example: 33403uL is 3.34.3
+#define USB_VERSION  35800uL // Format: Mmmrr Example: 35601uL is 3.56.1
 
 
 /*********************************************************************
@@ -172,6 +172,16 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 #define USB_STAT_ADDRESSED  (1u << 2)
 #define USB_STAT_CONFIGURED (1u << 1)
 #define USB_STAT_SUSPENDED  (1u << 0)
+
+/*********************************************************************
+*
+*       Device state flags
+*/
+#define USB_DEVSTAT_SELF_POWERED             (1uL << 0)  // Device is self-powered.
+#define USB_DEVSTAT_REMOTE_WAKEUP_ALLOWED    (1uL << 1)  // Remote Wakeup is allowed.
+#define USB_DEVSTAT_U1_ENABLE                (1uL << 2)  // Link power state U1 is enabled (SuperSpeed only).
+#define USB_DEVSTAT_U2_ENABLE                (1uL << 3)  // Link power state U2 is enabled (SuperSpeed only).
+#define USB_DEVSTAT_LPM_ENABLE               (1uL << 4)  // Link power management is enabled (SuperSpeed only).
 
 /*********************************************************************
 *
@@ -432,6 +442,26 @@ typedef int          USB_ON_SETUP             (const USB_SETUP_PACKET * pSetupPa
 
 /*********************************************************************
 *
+*       USB_ON_LPM_CHANGE
+*
+*  Description
+*    Type of callback set in USBD_SetOnLPMChange().
+*    This function is called when a LPM transition on the USB lines (L0 <-> L1) is detected.
+*
+*  Parameters
+*    State:  * -1 - Transition to L0.
+*            *  0 - Transition to L1. Remote wakeup not allowed.
+*            *  1 - Transition to L1. Remote wakeup allowed.
+*    BESL:   BESL value (Best Effort Service Latency) in range 0...15 reported by the host
+*            when requesting a transition to L1 state. Values of 0,1,...,14,15 specify a BESL
+*            of 125us,150us,...,9000us,10000us respectively,
+*            see "Errata for USB 2.0 ECN: Link Power Management (LPM) - 7/2007" from usb.org for
+*            an explanation of these values.
+*/
+typedef void         USB_ON_LPM_CHANGE        (int State, unsigned BESL);
+
+/*********************************************************************
+*
 *       USB_GET_STRING_FUNC
 *
 *  Description
@@ -571,6 +601,7 @@ void     USBD_DeInit                    (void);
 void     USBD_EnableIAD                 (void);
 void     USBD_EnableSuperSpeed          (void);
 unsigned USBD_GetState                  (void);
+unsigned USBD_GetDeviceState            (void);
 int      USBD_GetSpeed                  (void);
 void     USBD_Init                      (void);
 U32      USBD_GetVersion                (void);
@@ -623,6 +654,8 @@ void     USBD_DoRemoteWakeup            (void);
 void     USBD_SetIsSelfPowered          (U8 IsSelfPowered);
 void     USBD_SetAllowRemoteWakeUp      (U8 AllowRemoteWakeup);
 void     USBD_UseV210                   (void);
+void     USBD_SetBESLValues             (int BaselineBESL, int DeepBESL);
+void     USBD_SetOnLPMChange            (USB_ON_LPM_CHANGE * pfOnLPMChange);
 int      USBD_TxIsPending               (unsigned EPIndex);
 
 unsigned USBD_GetMaxPacketSize          (unsigned EPIndex);
@@ -878,6 +911,7 @@ int USB_DRIVER_STM32L4xx_DetectChargingPort(void);
 void USB_DRIVER_LPC546xx_Workaround(void);
 void USB_DRIVER_SYNERGYHS_ConfigPara(U16 PhySetVal, U16 BusWaitVal);
 void USB_DRIVER_SYNERGYHS_ConfigAddr(U32 BaseAddr);
+void USB_DRIVER_SYNERGYFS_ConfigAddr(U32 BaseAddr);
 
 void USB_DRIVER_Cypress_PSoC6_SysTick(void);
 void USB_DRIVER_Cypress_PSoC6_Resume(void);
@@ -962,7 +996,10 @@ void USB_DRIVER_Cypress_PSoC6_Resume(void);
 #define USB_Driver_Renesas_SynergyS7_FS USB_Driver_Renesas_SynergyFS
 #define USB_Driver_Renesas_RX200        USB_Driver_Renesas_RX100
 #define USB_Driver_SiLabs_EFM32GG11     USB_Driver_EM_EFM32GG990
+#define USB_Driver_Infineon_XMC42xx     USB_Driver_Infineon_XMC45xx
 
+
+extern const USB_HW_DRIVER USB_Driver_AlifSemi_E1;
 extern const USB_HW_DRIVER USB_Driver_Atmel_AT32UC3x;
 extern const USB_HW_DRIVER USB_Driver_Atmel_CAP9;
 extern const USB_HW_DRIVER USB_Driver_Atmel_SAM3U;
@@ -1002,6 +1039,7 @@ extern const USB_HW_DRIVER USB_Driver_Infineon_XMC45xx;
 extern const USB_HW_DRIVER USB_Driver_Infineon_XMC45xx_DynMem;
 extern const USB_HW_DRIVER USB_Driver_Infineon_XMC45xx_DMA;
 extern const USB_HW_DRIVER USB_Driver_MAX32570;
+extern const USB_HW_DRIVER USB_Driver_Microsemi_SmartFusion2;
 extern const USB_HW_DRIVER USB_Driver_Nordic_nRF52xxx;
 extern const USB_HW_DRIVER USB_Driver_Nordic_nRF53xx;
 extern const USB_HW_DRIVER USB_Driver_Nordic_nRF53xx_NS;

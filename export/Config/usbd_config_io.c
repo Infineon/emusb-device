@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -65,10 +65,9 @@ Purpose     : Sample implementation of log and warn function
 */
 #include <stdio.h>
 #include "USB.h"
-#include "cy_retarget_io.h"
 
 #if defined (__CROSSWORKS_ARM)
-  #include "__putchar.h"
+    #include "__putchar.h"
 #endif
 
 /*********************************************************************
@@ -78,51 +77,68 @@ Purpose     : Sample implementation of log and warn function
 *       This section is normally the only section which requires
 *       changes on most embedded systems.
 */
-#ifndef   USE_RTT
-  #define USE_RTT    0    // SEGGER's Real Time Terminal: https://www.segger.com/jlink-real-time-terminal.html
+
+/* The standard output methods are enabled by default
+ * To disable an output in Debug mode or provide a custom
+ * output method, set USBD_DISABLE_STANDARD_OUTPUT=1 in DEFINES
+ * variable in the application project Makefile
+ */
+#if !defined (USBD_DISABLE_STANDARD_OUTPUT)
+    #define USBD_DISABLE_STANDARD_OUTPUT        (0U)
+#endif /* #if !defined USBD_DISABLE_STANDARD_OUTPUT */
+
+#if (USBD_DISABLE_STANDARD_OUTPUT == 0U)
+/* Select one of the standard output methods */
+
+/* Retarget-io middleware: https://github.com/Infineon/retarget-io */
+#ifndef   USE_RETARGET_IO
+    #define USE_RETARGET_IO                     (1U)
 #endif
 
-#ifndef   USE_DCC
-  #define USE_DCC    0
+/* SEGGER's Real Time Terminal: https://www.segger.com/jlink-real-time-terminal.html */
+#ifndef   USE_RTT
+    #define USE_RTT                             (0U)
 #endif
+
+/* The Debug Communication Channel (DCC): https://wiki.segger.com/DCC */
+#ifndef   USE_DCC
+    #define USE_DCC                             (0U)
+#endif
+
+#endif /* #if (USBD_DISABLE_STANDARD_OUTPUT == 0U) */
 
 #ifndef   SHOW_TIME
-  #define SHOW_TIME  1
+    #define SHOW_TIME                           (1U)
 #endif
 
 #if defined(COMPONENT_RTOS_AWARE)
 
 #ifndef   SHOW_TASK
-  #define SHOW_TASK  1
-#endif
+    #define SHOW_TASK                           (1U)
 
-#if SHOW_TASK > 0
-  #include <FreeRTOS.h>
-  #include <task.h>
+    #include "cyabs_rtos.h"
 
-/* For __get_IPSR() */
-  #if defined (COMPONENT_CAT3)
-    #include <cmsis_compiler.h>
-  #else
     #include "cy_pdl.h"
-  #endif /* #ifdef COMPONENT_CAT3 */
 #endif
 
 #else /* Non RTOS environment */
 
-#ifndef   SHOW_TASK
-  #define SHOW_TASK  0
-#endif
+/* SHOW_TASK is not supported in the Non RTOS environment */
+#define SHOW_TASK                               (0U)
 
 #endif /* #if defined(COMPONENT_RTOS_AWARE) */
 
-#if USE_RTT
-  #include "SEGGER_RTT.h"
-#endif
+#if (USE_RETARGET_IO == 1U)
+    #include "cy_retarget_io.h"
+#endif /* (USE_RETARGET_IO == 1U) */
 
-#if USE_DCC
-  #include "JLINKDCC.h"
-#endif
+#if (USE_RTT == 1U)
+    #include "SEGGER_RTT.h"
+#endif /* #if (USE_RTT == 1U) */
+
+#if (USE_DCC == 1U)
+    #include "JLINKDCC.h"
+#endif /* #if (USE_DCC == 1U) */
 
 /*********************************************************************
 *
@@ -137,34 +153,43 @@ Purpose     : Sample implementation of log and warn function
 *    s - Pointer to a string.
 */
 static void _puts(const char * s) {
-#if USE_RTT
-  SEGGER_RTT_WriteString(0, s);
-#else
-#if USE_DCC
-  char c;
-
-  for (;;) {
-    c = *s++;
-    if (c == 0) {
-      break;
+#if (USBD_DISABLE_STANDARD_OUTPUT == 1U)
+    /* Add the custom output method */
+    (void) s;
+#else /* Standard debug output methods */
+#if (USE_RETARGET_IO == 1U)
+    /* The retarget-io does not send the debug messages from
+     * inside the ISRs in RTOS aware environments.
+     */
+#if defined(COMPONENT_RTOS_AWARE)
+    if (__get_IPSR() == 0U)
+    {
+#endif /* #if !defined(COMPONENT_RTOS_AWARE) */
+        printf("%s", s);
+#if defined(COMPONENT_RTOS_AWARE)
     }
-
-    JLINKDCC_SendChar(c);
-
-#else
-/* The retarget-io does not send the debug message from
- * the interrupt in RTOS aware environments.
- */
-#if defined(COMPONENT_RTOS_AWARE)
-if (__get_IPSR() == 0U)
-{
 #endif /* #if !defined(COMPONENT_RTOS_AWARE) */
-  printf("%s", s);
-#if defined(COMPONENT_RTOS_AWARE)
-}
-#endif /* #if !defined(COMPONENT_RTOS_AWARE) */
-#endif
-#endif
+#elif (USE_RTT == 1U)
+    SEGGER_RTT_WriteString(0, s);
+#elif (USE_DCC == 1U)
+    char c;
+
+    for (;;)
+    {
+        c = *s++;
+        if (c == 0)
+        {
+            break;
+        }
+
+        JLINKDCC_SendChar(c);
+    }
+#else /* Unspecified debug output method */
+    #warning Unspecified debug output method. Select one of the available or set \
+             USBD_DISABLE_STANDARD_OUTPUT=1 in the defines variable \
+             of the application project Makefile
+#endif /* #if (USE_RETARGET_IO == 1U) */
+#endif /* #if (USBD_DISABLE_STANDARD_OUTPUT == 1U) */
 }
 
 /*********************************************************************
@@ -184,29 +209,29 @@ if (__get_IPSR() == 0U)
 */
 #if SHOW_TIME
 static char * _WriteUnsigned(char * s, U32 v, int NumDigits) {
-  unsigned   Base;
-  unsigned   Div;
-  U32        Digit;
-  Digit    = 1;
-  Base     = 10;
-  //
-  // Count how many digits are required
-  //
-  while (((v / Digit) >= Base) || (NumDigits > 1)) {
-    NumDigits--;
-    Digit *= Base;
-  }
-  //
-  // Output digits
-  //
-  do {
-    Div = v / Digit;
-    v  -= Div * Digit;
-    *s++ = (char)('0' + Div);
-    Digit /= Base;
-  } while (Digit);
-  *s = 0;
-  return s;
+    unsigned   Base;
+    unsigned   Div;
+    U32        Digit;
+    Digit    = 1;
+    Base     = 10;
+
+    /* Count how many digits are required */
+    while (((v / Digit) >= Base) || (NumDigits > 1))
+    {
+        NumDigits--;
+        Digit *= Base;
+    }
+
+    /* Output digits */
+    do
+    {
+        Div = v / Digit;
+        v  -= Div * Digit;
+        *s++ = (char)('0' + Div);
+        Digit /= Base;
+    } while (Digit);
+    *s = 0;
+    return s;
 }
 #endif
 
@@ -221,36 +246,49 @@ static char * _WriteUnsigned(char * s, U32 v, int NumDigits) {
 */
 static void _ShowStamp(void) {
 #if SHOW_TIME
-  I32    Time;
-  char   ac[20];
-  char * sBuffer = &ac[0];
-  Time           = USB_OS_GetTickCnt();
-  sBuffer        = _WriteUnsigned(sBuffer, Time / 1000, 0);
-  *sBuffer++     = ':';
-  sBuffer        = _WriteUnsigned(sBuffer, Time % 1000, 3);
-  *sBuffer++     = ' ';
-  *sBuffer++     = 0;
-  _puts(ac);
+    I32    Time;
+    char   ac[20];
+    char * sBuffer = &ac[0];
+    Time           = USB_OS_GetTickCnt();
+    sBuffer        = _WriteUnsigned(sBuffer, Time / 1000, 0);
+    *sBuffer++     = ':';
+    sBuffer        = _WriteUnsigned(sBuffer, Time % 1000, 3);
+    *sBuffer++     = ' ';
+    *sBuffer++     = 0;
+    _puts(ac);
 #endif
 
 #if SHOW_TASK
 {
-  const char * s = NULL;
-  if (__get_IPSR() == 0U)
-  {
-    TaskHandle_t task_handle = xTaskGetCurrentTaskHandle();
-    s = pcTaskGetName(task_handle);
-    if (s == NULL)
+    const char * s = NULL;
+    if (__get_IPSR() == 0U)
     {
-      s = "ERROR: Unknown task name";
+        cy_rslt_t result;
+        cy_thread_t current_thread_handle;
+        result = cy_rtos_thread_get_handle(&current_thread_handle);
+        if (CY_RSLT_SUCCESS == result)
+        {
+            result = cy_rtos_thread_get_name(&current_thread_handle, &s);
+            if (CY_RSLT_SUCCESS != result)
+            {
+                s = "ERROR: Unknown task name";
+            }
+        }
+        else
+        {
+            s = "ERROR: Unknown task name";
+        }
     }
-  }
-  else
-  {
-    s = "Interrupt";
-  }
-  _puts(s);
-  _puts(" - ");
+    else
+    {
+        s = "Interrupt";
+    }
+
+    if (s)
+    {
+        _puts(s);
+        _puts(" - ");
+    }
 }
 #endif
 }
@@ -274,9 +312,9 @@ static void _ShowStamp(void) {
 *    program after a failure.
 */
 void USB_OS_Panic(const char * pErrMsg) {
-  USB_LOG((USB_MTYPE_INFO, "PANIC: %s", pErrMsg));
-  USB_OS_IncDI();
-  while (pErrMsg);
+    USB_LOG((USB_MTYPE_INFO, "PANIC: %s", pErrMsg));
+    USB_OS_IncDI();
+    while (pErrMsg);
 }
 
 /*********************************************************************
@@ -291,11 +329,11 @@ void USB_OS_Panic(const char * pErrMsg) {
 *    s - Pointer to a string holding the log message.
 */
 void USB_X_Log(const char * s) {
-  USB_OS_IncDI();
-  _ShowStamp();
-  _puts(s);
-  _puts("\r\n");
-  USB_OS_DecRI();
+    USB_OS_IncDI();
+    _ShowStamp();
+    _puts(s);
+    _puts("\r\n");
+    USB_OS_DecRI();
 }
 
 /*********************************************************************
@@ -310,12 +348,12 @@ void USB_X_Log(const char * s) {
 *    s - Pointer to a string holding the warning message.
 */
 void USB_X_Warn(const char * s) {
-  USB_OS_IncDI();
-  _ShowStamp();
-  _puts("*** Warning *** ");
-  _puts(s);
-  _puts("\r\n");
-  USB_OS_DecRI();
+    USB_OS_IncDI();
+    _ShowStamp();
+    _puts("*** Warning *** ");
+    _puts(s);
+    _puts("\r\n");
+    USB_OS_DecRI();
 }
 
 /*************************** End of file ****************************/

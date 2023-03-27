@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -51,9 +51,8 @@ Support and Update Agreement (SUA)
 SUA period:               2022-05-12 - 2024-05-19
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
-File    : USB_Audio.h
 Purpose : Public header of audio device class
---------  END-OF-HEADER  ---------------------------------------------
+-------------------------- END-OF-HEADER -----------------------------
 */
 
 #ifndef USBD_AUDIO_H          /* Avoid multiple inclusion */
@@ -372,7 +371,7 @@ typedef struct _USBD_AUDIO_IF_CONF {
 *   Description
 *     Initialization data for the Audio class instance.
 */
-typedef struct {
+typedef struct {                                  // NOLINT(clang-analyzer-optin.performance.Padding)
   U8                         EPIn;                // Isochronous IN endpoint for sending data to the host. If microphone functionality is not desired set this to 0.
   U8                         EPOut;               // Isochronous OUT endpoint for receiving data from the host. If speaker functionality is not desired set this to 0.
   unsigned                   OutPacketSize;       // Size of a single audio OUT packet. Must be calculated as follows: (highest used) SampleRate * NumChannels * BitsPerSample / 8 / 1000
@@ -385,8 +384,6 @@ typedef struct {
   void                     * pOutUserContext;     // Pointer to a user context which is passed to the pfOnOut function. Optional, can be NULL.
   void                     * pInUserContext;      // Pointer to a user context which is passed to the pfOnIn function. Optional, can be NULL.
 } USBD_AUDIO_INIT_DATA;
-
-//tidy ignore-padding:USBD_AUDIO_INIT_DATA
 
 /*********************************************************************
 *

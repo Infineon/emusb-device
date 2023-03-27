@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -51,9 +51,8 @@ Support and Update Agreement (SUA)
 SUA period:               2022-05-12 - 2024-05-19
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
-File    : USB_MSD.h
 Purpose : Public header of the mass storage device client
---------  END-OF-HEADER  ---------------------------------------------
+-------------------------- END-OF-HEADER -----------------------------
 */
 
 #ifndef USBD_MSD_H          /* Avoid multiple inclusion */
@@ -259,7 +258,7 @@ typedef struct {
 *    USB-MSD initialization structure that is required
 *    when adding an MSD interface.
 */
-typedef struct {
+typedef struct {                // NOLINT(clang-analyzer-optin.performance.Padding)
   void     * pStart;            // A pointer defining the start address
   U32        StartSector;       // The start sector that is used for the driver.
   U32        NumSectors;        // The available number of sectors available for the driver.
@@ -268,8 +267,6 @@ typedef struct {
   unsigned   NumBytes4Buffer;   // Size of the application provided buffer.
   U8         NumBuffers;        // Number of buffer that are available. This is only used when using the MT storage layer.
 } USB_MSD_INST_DATA_DRIVER;
-
-//tidy ignore-padding:USB_MSD_INST_DATA_DRIVER
 
 /*********************************************************************
 *
@@ -286,6 +283,7 @@ typedef struct {
 *
 */
 typedef void       (USB_MSD_STORAGE_INIT)           (U8 Lun, const USB_MSD_INST_DATA_DRIVER * pDriverData);
+
 /*********************************************************************
 *
 *       USB_MSD_STORAGE_GETINFO
@@ -428,7 +426,7 @@ typedef struct {
 *    except DeviceType and pfHandleCmd because it is done by the functions
 *    USBD_MSD_AddUnit() or USBD_MSD_AddCDROM().
 */
-typedef struct {
+typedef struct {                                // NOLINT(clang-analyzer-optin.performance.Padding)
   const USB_MSD_STORAGE_API * pAPI;             // Pointer to a structure that holds the storage device driver API.
   USB_MSD_INST_DATA_DRIVER    DriverData;       // Driver data that are passed to the storage driver.
                                                 // Refer to USB_MSD_INST_DATA_DRIVER for detailed information about how to initialize this structure.
@@ -440,8 +438,6 @@ typedef struct {
   U8                          IsWriteProtected; // Specifies whether the storage medium shall be write-protected.
   const USB_MSD_LUN_INFO    * pLunInfo;         // Pointer to a USB_MSD_LUN_INFO structure. Filling this structure is mandatory for each LUN.
 } USB_MSD_INST_DATA;
-
-//tidy ignore-padding:USB_MSD_INST_DATA
 
 typedef struct {
   U32         SectorIndex;

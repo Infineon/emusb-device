@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2022     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.52.2                                *
+*       emUSB-Device version: V3.58.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -61,6 +61,11 @@ Purpose : Config file. Modify to reflect your configuration
 #define USB_CONF_H
 
 #define USB_DEBUG_LEVEL                         (2)
+#define USB_MAX_NUM_IF                          (4)
+#define USB_MAX_NUM_IAD                         (4)
+#define USB_MAX_NUM_MS_DESC                     (USB_MAX_NUM_IF)
+#define USB_MAX_NUM_COMPONENTS                  (USB_MAX_NUM_IF)
+#define USB_NUM_EPS                             (9)
 #define USB_SUPPORT_TRANSFER_ISO                (1)
 #define USBD_OS_USE_USBD_X_INTERRUPT            (1)
 
