@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.58.0                                *
+*       emUSB-Device version: V3.60.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -73,6 +73,10 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 */
 #ifndef   USB_MTP_POLL_TIMEOUT
   #define USB_MTP_POLL_TIMEOUT        100u  // Timeout used with USBD_MTP_Poll()
+#endif
+
+#ifndef   USB_MTP_READ_TIMEOUT
+  #define USB_MTP_PEAD_TIMEOUT      10000u  // Timeout used for read operations.
 #endif
 
 #ifndef   MTP_MAX_NUM_STORAGES
@@ -1259,6 +1263,8 @@ typedef struct {                  // NOLINT(clang-analyzer-optin.performance.Pad
   U8     EPOut;                   // Endpoint for sending data to host.
   U8     EPInt;                   // Endpoint for sending events to host.
   void * pObjectList;             // Pointer to a memory region where the list of MTP objects is stored. Should be 4 byte aligned.
+                                  // Each object requires a minimum of 12 bytes + the size of the file name inside the this list.
+                                  // 33 more bytes are needed per object if MTP_SAVE_FILE_INFO is set to 1.
   U32    NumBytesObjectList;      // Number of bytes allocated for the object list.
   void * pDataBuffer;             // Pointer to a memory region to be used as communication buffer.
   U32    NumBytesDataBuffer;      // Number of bytes allocated for the data buffer.

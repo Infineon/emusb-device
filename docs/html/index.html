@@ -107,6 +107,7 @@ $(document).ready(function(){initNavTree('index.html',''); initResizable(); });
 </ul>
 <p ><b>Device families supported by the Middleware:</b></p><ul>
 <li>CAT1A</li>
+<li>CAT3</li>
 </ul>
 <h1><a class="anchor" id="section_emusb_device_general"></a>
 General Description</h1>
@@ -125,7 +126,16 @@ General Description</h1>
 <th>Device family</th><th>Drivers</th><th>Pointer to the driver API structure </th></tr>
 <tr>
 <td>CAT1A </td><td>Cypress PSoC 6 driver </td><td>USB_Driver_Cypress_PSoC6  </td></tr>
+<tr>
+<td rowspan="2">CAT3 </td><td>Synopsys DWC2 driver (slave mode)  </td><td><ul>
+<li>USB_Driver_Infineon_XMC45xx</li>
+<li>USB_Driver_Infineon_XMC45xx_DynMem   </li>
+</ul>
+</td></tr>
+<tr>
+<td>Synopsys DWC2 driver (DMA mode)  </td><td>USB_Driver_Infineon_XMC45xx_DMA   </td></tr>
 </table>
+<p >For CAT3 device, the DMA engine of USB IP block does not have access to all SRAM regions. Check Reference Manual for CAT3 device for more information. As a result the memory pool for USB_Driver_Infineon_XMC45xx_DMA driver must be placed only to SRAM region with DMA access. Typically linker script provided with mtb-xmclib-cat3 defines special region - USB_RAM. You can place memory pool to USB_RAM by the next approach: <b>CY_SECTION("USB_RAM") __USED static uint32_t mem_pool[512]</b>. Also it is compulsory to register appropriate callback by USBD_SetCheckAddress(). This callback should check if an address can be used for DMA transfers. You can use the next variables from linker script to determine the borders of the SRAM region: <b>USB_RAM_start, USB_RAM_end</b>. The example of driver configuration is provided in usbd_config.c file.</p>
 <dl class="section note"><dt>Note</dt><dd>For the USBD_AddDriver() function description, refer to the: <a href="./../UM09001_emUSBD.pdf"><b>SEGGER emUSB-Device User Guide &amp; Reference Manual</b></a>.</dd></dl>
 <p>The emUSB-Device is provided in the form of pre-build libraries. The pre-build library is selected automatically based on configuration of Application project.</p>
 <p >The emUSB-device has been already implemented the Target OS Interface for both RTOS and non-RTOS aware environments. The Target OS Interface for RTOS environment is implemented by abstraction-rtos, so this Middleware can be used with any RTOSes supported by abstraction-rtos.</p>
@@ -133,7 +143,7 @@ General Description</h1>
 <li>One common file responsible for the debug message output</li>
 <li>Device-specific files for the hardware configuration of each supported device family</li>
 </ul>
-<p >Also, the emUSB-Host/Device personality is present in the Device-configurator for simplify routine of configuration clocks and pins for USB IP block operation. The personality is a part of mtb-pdl-cat1 for CAT1A devices.</p>
+<p >Also, the emUSB-Host/Device personality is present in the Device-configurator for simplify routine of configuration clocks and pins for USB IP block operation. The personality is a part of mtb-pdl-cat1 for CAT1A devices and mtb-xmclib-cat3 for CAT3 libraries.</p>
 <h1><a class="anchor" id="section_emusb_device_quick_start"></a>
 Quick Start</h1>
 <p >To set up emUSB-Device for mouse and keyboard Human Interface Devices (HID), follow the below-described steps. These code snippets will move the mouse cursor left and right and print the "Hello world" message into the opened text editor. The current snippet is based on SEGGER sample application.</p>
@@ -150,7 +160,7 @@ Add the FreeRTOS middleware into the Library Manager if you want to use the Free
 <li>Open Makefile of the project. Add USBD_BASE to the COMPONENTS section of the Makefile. <div class="image">
 <img src="emusb_device_makefile.png" alt=""/>
 </div>
- <dl class="section note"><dt>Note</dt><dd>Add FREERTOS to the COMPONENTS section of the Makefile if you want to use FreeRTOS. <div class="image">
+ <dl class="section note"><dt>Note</dt><dd>Add FREERTOS and RTOS_AWARE to the COMPONENTS section of the Makefile if you want to use FreeRTOS. <div class="image">
 <img src="emusb_device_makefile_freertos.png" alt=""/>
 </div>
 </dd></dl>
@@ -160,10 +170,10 @@ Add the FreeRTOS middleware into the Library Manager if you want to use the Free
 STEP 2: Configure pins and clocks for emUSB-Device.</h2>
 <p ><b>CAT1A Devices:</b></p>
 <ol type="1">
-<li>Launch the ModusToolbox Device Configurator Tool and switch to the Peripherals tab (#1.1).</li>
-<li>Enable the USB personality under Communication (#1.2) and select the emUSB-Host/Device 1.0 personality (#1.3).</li>
+<li>Launch the ModusToolbox Device Configurator and switch to the Peripherals tab (#1.1).</li>
+<li>Enable the USB personality under Communication (#1.2) and select the emUSB-Host/Device personality (#1.3).</li>
 <li>Ensure that USB mode is Device (#1.4) and the Clock is connected to CLK_HF3 (#1.5). <div class="image">
-<img src="emusb_device_peripherals_cfg.png" alt=""/>
+<img src="cat1a_emusb_device_peripherals_cfg.png" alt=""/>
 </div>
 </li>
 <li><p class="startli">Switch to the System tab (#2.1).</p>
@@ -173,21 +183,39 @@ STEP 2: Configure pins and clocks for emUSB-Device.</h2>
 <li>If your device supports more than one PLL, select one. Enable the selected PLL and set a frequency of 48 MHz (#2.3). <dl class="section note"><dt>Note</dt><dd>Select the enabled source clock with accuracy +/-0.25% into the PATH_MUX section of the selected PLL (#2.4).</dd></dl>
 </li>
 <li>Select the CLK_HF3 USB clock (#2.5). Assign the source clock to the CLK_PATH connected to the configured previously PLL.</li>
-<li>Select the CLK_HF0 USB clock (#2.6). Assign the source clock to the CLK_PATH connected to the PLL with the clock accuracy +/-0.25%. <dl class="section note"><dt>Note</dt><dd>You can use the PLL selected for CLK_HF3 or choose another one as it shown into the example (#2.7)</dd></dl>
+<li>Select the CLK_HF0 USB clock (#2.6). Assign the source clock to the CLK_PATH connected to the PLL with the clock accuracy +/-0.25%. <dl class="section note"><dt>Note</dt><dd>You can use the PLL selected for CLK_HF3 or choose another one as it shown into the example (#2.7) <div class="image">
+<img src="cat1a_emusb_device_system_cfg.png" alt=""/>
+</div>
+</dd></dl>
 </li>
-<li>Select File-&gt;Save to generate initialization code. <div class="image">
-<img src="emusb_device_system_cfg.png" alt=""/>
+<li>If the Power personality is enabled, the System Idle Power Mode must be Active or CPU sleep. <div class="image">
+<img src="cat1a_emusb_device_power_cfg.png" alt=""/>
 </div>
 </li>
-<li>Also if the Power personality is enabled the System Idle Power Mode must be have Active or CPU sleep. <div class="image">
-<img src="emusb_device_power_cfg.png" alt=""/>
+<li>Select File-&gt;Save to generate initialization code.</li>
+</ol>
+<p ><b>CAT3 Devices:</b></p>
+<ol type="1">
+<li>Launch the ModusToolbox Device Configurator Tool and switch to the Peripherals tab (#1.1).</li>
+<li>Enable the USB personality under Communication (#1.2).</li>
+<li>Select the USB mode as Device (#1.3).</li>
+<li>If you want to create a non-RTOS emUSB application, you should configure the emUSB OS Timer personality by selecting CCU4 source (#1.4) and configure the CCU4 Slice as the <em>emUSB OS Timer</em> personality (#1.5). Check the <em>CCU for OS</em> checkbox (#1.6) and select the appropriate emUSB OS Timer CCU Resource (#1.7). <div class="image">
+<img src="cat3_emusb_device_peripherals_cfg.png" alt=""/>
 </div>
 </li>
+<li>Follow the instructions in the bottom window to set up the clock source for USB. The USB clock source configuration must look like the configuration on the image below. <div class="image">
+<img src="cat3_emusb_device_system_cfg.png" alt=""/>
+</div>
+ <dl class="section note"><dt>Note</dt><dd>You can also use <em>System PLL</em> instead <em>USB PLL</em> as a source.</dd>
+<dd>
+Recommended: set the highest frequency of <em>System PLL Clock -&gt; CPU Clock</em> for proper work of USB functionality.</dd></dl>
+</li>
+<li>Select File-&gt;Save to generate initialization code.</li>
 </ol>
 <h2><a class="anchor" id="subsection_qsg_step3"></a>
 STEP 3: Write the code in main.c.</h2>
 <ol type="1">
-<li>Include headers to get access to the emUSB drivers and retarget-io. <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;ctype.h&gt;</span></div>
+<li>Include headers to get access to the emUSB-Device functions and retarget-io. <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;ctype.h&gt;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;cybsp.h&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;cy_retarget_io.h&quot;</span></div>
 <div class="line"><span class="comment">/* Include emUSB-Device headers */</span></div>
@@ -196,10 +224,6 @@ STEP 3: Write the code in main.c.</h2>
 </div><!-- fragment --> <dl class="section note"><dt>Note</dt><dd>Include the following headers if you want to use FreeRTOS: <div class="fragment"><div class="line"><span class="comment">/* Include FreeRTOS headers */</span></div>
 <div class="line"><span class="preprocessor">#include &quot;FreeRTOS.h&quot;</span></div>
 <div class="line"><span class="preprocessor">#include &quot;task.h&quot;</span></div>
-</div><!-- fragment --> </dd>
-<dd>
-If you are working with CAT1A boards, include the following file: <br  />
- <div class="fragment"><div class="line"><span class="preprocessor">#include &quot;cyhal.h&quot;</span></div>
 </div><!-- fragment --></dd></dl>
 </li>
 <li>Add a structure prototype with the information about emUSB-Device. <div class="fragment"><div class="line"><span class="keyword">static</span> <span class="keyword">const</span> USB_DEVICE_INFO device_info = {</div>
@@ -550,6 +574,30 @@ If you are working with CAT1A boards, include the following file: <br  />
 <div class="line">    USB_OS_Delay(1000);</div>
 <div class="line">}</div>
 </div><!-- fragment --></li>
+<li><p class="startli">Initialize retarget-io to use the debug UART port:</p>
+<p class="startli"><b> For CAT1A devices:</b></p>
+<div class="fragment"><div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> retarget_io_init(<span class="keywordtype">void</span>)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">/* Configures the retarget_io pins */</span></div>
+<div class="line">    cy_rslt_t result;</div>
+<div class="line">    result = cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);</div>
+<div class="line">    <span class="keywordflow">if</span> (CY_RSLT_SUCCESS != result)</div>
+<div class="line">    {</div>
+<div class="line">        CY_ASSERT(0);</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --><p class="startli"><b> For CAT3 devices:</b></p>
+<div class="fragment"><div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> retarget_io_init(<span class="keywordtype">void</span>)</div>
+<div class="line">{</div>
+<div class="line">    <span class="comment">/* Configures the retarget_io pins */</span></div>
+<div class="line">    cy_rslt_t result;</div>
+<div class="line">    result = cy_retarget_io_init(CYBSP_DEBUG_UART_HW);</div>
+<div class="line">    <span class="keywordflow">if</span> (CY_RSLT_SUCCESS != result)</div>
+<div class="line">    {</div>
+<div class="line">        XMC_ASSERT(0, <span class="stringliteral">&quot;cy_retarget_io_init returns error status&quot;</span>);</div>
+<div class="line">    }</div>
+<div class="line">}</div>
+</div><!-- fragment --></li>
 <li>Create the main_task() function <div class="fragment"><div class="line"><span class="comment">/*******************************************************************************</span></div>
 <div class="line"><span class="comment">* Function Name: main_task</span></div>
 <div class="line"><span class="comment">********************************************************************************</span></div>
@@ -562,6 +610,8 @@ If you are working with CAT1A boards, include the following file: <br  />
 <div class="line"><span class="keywordtype">void</span> main_task(<span class="keywordtype">void</span>* arg)</div>
 <div class="line">{</div>
 <div class="line">    (void)arg;</div>
+<div class="line"> </div>
+<div class="line">    retarget_io_init();</div>
 <div class="line"> </div>
 <div class="line">    <span class="comment">/* Mouse movement values */</span></div>
 <div class="line">    int8_t mouse_move_left = -75;</div>
@@ -583,6 +633,7 @@ If you are working with CAT1A boards, include the following file: <br  />
 <div class="line"> </div>
 <div class="line">    <span class="comment">/* Sets information used during the device enumeration */</span></div>
 <div class="line">    USBD_SetDeviceInfo(&amp;device_info);</div>
+<div class="line"> </div>
 <div class="line">    <span class="comment">/* Starts emUSB-Device */</span></div>
 <div class="line">    USBD_Start();</div>
 <div class="line"> </div>
@@ -593,7 +644,7 @@ If you are working with CAT1A boards, include the following file: <br  />
 <div class="line">        {</div>
 <div class="line">            <span class="comment">/* Do something to indicate waiting for configuration */</span></div>
 <div class="line">        }</div>
-<div class="line">        </div>
+<div class="line"> </div>
 <div class="line">        <span class="comment">/* Moves the mouse cursor left and right */</span></div>
 <div class="line">        mouse_moves(mouse_handler, mouse_move_left);</div>
 <div class="line">        mouse_moves(mouse_handler, mouse_move_right);</div>
@@ -602,9 +653,6 @@ If you are working with CAT1A boards, include the following file: <br  />
 <div class="line">    }</div>
 <div class="line">}</div>
 </div><!-- fragment --></li>
-<li>Initialize retarget-io in main() to use the debug UART port. <dl class="section note"><dt>Note</dt><dd>If you are working with CAT1A boards, use the following code to configure retarget_io: <div class="fragment"><div class="line">    cy_retarget_io_init(CYBSP_DEBUG_UART_TX, CYBSP_DEBUG_UART_RX, CY_RETARGET_IO_BAUDRATE);</div>
-</div><!-- fragment --></dd></dl>
-</li>
 <li><p class="startli">Call main_task():</p>
 <p class="startli"><b> For non-RTOS environments:</b></p>
 <p class="startli">Call the main_task() into the main() function. </p><div class="fragment"><div class="line">    main_task(NULL);</div>
@@ -612,7 +660,8 @@ If you are working with CAT1A boards, include the following file: <br  />
 <p class="startli">Create a FreeRTOS task with main_task() using xTaskCreate and start the task scheduler instead of calling main_task(): </p><div class="fragment"><div class="line">    <span class="comment">/* Creates a FreeRTOS task of the main_task() function */</span></div>
 <div class="line">    xTaskCreate(main_task, <span class="stringliteral">&quot;main_task&quot;</span>, 500U, NULL, configMAX_PRIORITIES - 6, NULL);</div>
 <div class="line">    vTaskStartScheduler();</div>
-</div><!-- fragment --></li>
+</div><!-- fragment --><dl class="section warning"><dt>Warning</dt><dd>Typically, the default interrupt priority-configuration from the usbd_config.c file will work with the default FreeRTOS config file. For a malfunction USB project, ensure that the USB interrupt priority is aligned with MAX_API_CALL_INTERRUPT_PRIORITY. See <a class="el" href="index.html#section_emusb_device_use_in_rtos">Using emUSB-Device in an RTOS Environment</a>.</dd></dl>
+</li>
 </ol>
 <h2><a class="anchor" id="subsection_qsg_step5"></a>
 STEP 4: Check the emUSB-Device workability.</h2>
@@ -636,24 +685,32 @@ USB Pins Configuration</h3>
 <p >The following snippet initializes GPIO pins for USB operation by <a href="https://github.com/Infineon/mtb-pdl-cat1"><b>mtb-pdl-cat1 APIs</b></a>.</p>
 <div class="fragment"><div class="line">    Cy_GPIO_Pin_FastInit(USBDP_PORT, USBDP_PIN, CY_GPIO_DM_ANALOG, 0U, USBDP_GPIO);</div>
 <div class="line">    Cy_GPIO_Pin_FastInit(USBDM_PORT, USBDM_PIN, CY_GPIO_DM_ANALOG, 0U, USBDM_GPIO);</div>
-</div><!-- fragment --><h3><a class="anchor" id="section_emusb_device_hw_dep_conf_clock"></a>
+</div><!-- fragment --><p ><b> CAT3 Devices Family </b></p>
+<p >The D+/D- pins are dedicated and do not require configuration.</p>
+<h3><a class="anchor" id="section_emusb_device_hw_dep_conf_clock"></a>
 USB Clock Configuration</h3>
 <p >The USB 2.0 specification defines the required bit rate accuracy for the device in section 7.1.11. Ensure that the clock sources for USB meet the requirements.</p>
-<p >The emUSB-Host/Device personality in the Device Configurator allows for easy configuration of the clocks for USB operation and also check if the clocks meet the requirements. Otherwise, the clocks can be configured manually by PDL/HAL APIs for CAT1A.</p>
+<p >The emUSB-Host/Device personality in the Device Configurator allows for easy configuration of the clocks for USB operation and also check if the clocks meet the requirements. Otherwise, the clocks can be configured manually by PDL/HAL APIs for CAT1A and by XMCLIB for CAT3.</p>
 <p ><b> CAT1A Devices Family </b></p>
 <p >The USB device requires two clocks for operation:</p><ul>
 <li>Clock the main clock at 48 MHz. Typically, the main clock is CLK_HF3 output signal, but refer to the device datasheet to identify the clock source for USB for a specific device.</li>
 <li>Clock the Clock (Bus Reset) at 100 kHz. Typically, Clock (Bus Reset) is connected to CLK_PERI through peripheral clock dividers but refer to the device datasheet to identify the Clock (Bus Reset) source for USB for a specific device.</li>
 </ul>
+<p >Both these clocks must be configured with the defined bit rate accuracy per USB 2.0 specification.</p>
 <dl class="section note"><dt>Note</dt><dd>Ensure that the clock sources for USB meet the requirements.</dd></dl>
+<p><b> CAT3 Devices Family </b></p>
+<p >The USB Device requires two clocks for operation:</p><ul>
+<li>The USB Phy Clock output must be configured at 48 MHz frequency with required bit rate accuracy according to the USB 2.0 specification.</li>
+<li>The second USB clock is connected to CPU clock. The CPU clock should be set to highest frequency as possible according to application design. If the CPU clock will have too low frequency the some of USB functionality won't work properly. For more details, refer to the Reference Manual of your CAT3 device.</li>
+</ul>
+<dl class="section note"><dt>Note</dt><dd>If the USB must operate during Deep Sleep, keep both clocks enabled.</dd></dl>
 <h3><a class="anchor" id="section_emusb_device_hw_dep_conf_int"></a>
 USB Interrupt Configuration</h3>
 <p >The interrupt is mandatory for the emUSB-Device Middleware operation. The interrupt priority selection is a part of Application level - the interrupt priority selected in the template files is not suitable for real project. For USB recommended setting the interrupt priority as high as possible.</p>
 <p ><b> CAT1A Devices Family </b></p>
 <p >emUSB-Device uses only one interrupt source from the three available in the IP USB block - usb_interrupt_med_IRQn. The emUSB-Device code can be executed on CM4 and CM0+ cores. For CM0+, the interrupt source of the USB IP block can be connected to one of CM0+ IRQs. Refer to the device datasheet and <a href="https://infineon.github.io/mtb-pdl-cat1/pdl_api_reference_manual/html/group__group__sysint.html"><b>SysInt (System Interrupt) Driver documentation</b></a> to find the available IRQs for CM0+.</p>
-<p >The following code snippet shows the interrupt configuration for both CM4 and CM0+ cores.</p>
-<dl class="section note"><dt>Note</dt><dd>The number of CM0+ interrupt vectors is different for different devices, so, this code snippet may not be suitable for all devices.</dd></dl>
-<div class="fragment"><div class="line"><span class="comment">/* Define the interrupt source */</span></div>
+<ul>
+<li>The following code snippet shows the interrupt configuration for both CM4 and CM0+ cores. <div class="fragment"><div class="line"><span class="comment">/* Define the interrupt source */</span></div>
 <div class="line"><span class="preprocessor">#if (COMPONENT_CM0P)</span></div>
 <div class="line"><span class="comment">/* The number of CM0+ interrupt vectors is different for different devices,</span></div>
 <div class="line"><span class="comment"> * so, change the following macro for your selected device.</span></div>
@@ -666,7 +723,7 @@ USB Interrupt Configuration</h3>
 <div class="line"><span class="comment">/* Define the interrupt priority */</span></div>
 <div class="line"><span class="preprocessor">#define USBD_ISR_PRIO                           (3U)</span></div>
 <div class="line"> </div>
-<div class="line"><span class="comment">/* This function should be register as a callback in USBD_SetISREnableFunc(). */</span></div>
+<div class="line"><span class="comment">/* Register this function as a callback in USBD_SetISREnableFunc(). */</span></div>
 <div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> enable_isr(USB_ISR_HANDLER * pfISRHandler)</div>
 <div class="line">{</div>
 <div class="line">    <span class="comment">/* Install interrupt service routine */</span></div>
@@ -677,7 +734,62 @@ USB Interrupt Configuration</h3>
 <div class="line"> </div>
 <div class="line">    NVIC_EnableIRQ(USBD_INTERRUPT_NUM);</div>
 <div class="line">}</div>
-</div><!-- fragment --><h2><a class="anchor" id="section_emusb_device_debug_mes_out"></a>
+</div><!-- fragment --></li>
+</ul>
+<dl class="section note"><dt>Note</dt><dd>The number of CM0+ interrupt vectors is different for different devices, so, this code snippet may not be suitable for all devices.</dd></dl>
+<p><b> CAT3 Devices Family </b></p>
+<p >CAT3 devices have only one interrupt source in the IP USB block - USB0_0_IRQn.</p>
+<ul>
+<li>The following code snippet shows the interrupt configuration for CAT3 devices: <div class="fragment"><div class="line"><span class="comment">/* Define interrupt priority. In case of FreeRTOS ensure that</span></div>
+<div class="line"><span class="comment"> * configMAX_SYSCALL_INTERRUPT_PRIORITY in FreeRTOSConfig.h is</span></div>
+<div class="line"><span class="comment"> * configured in accordance to XMC4xxx interrupts configuration</span></div>
+<div class="line"><span class="comment"> */</span></div>
+<div class="line"><span class="preprocessor">#define USBD_ISR_PRIO                           (63U)</span></div>
+<div class="line"> </div>
+<div class="line"><span class="keyword">static</span> USB_ISR_HANDLER * p_usb_isr_handler;</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">/*********************************************************************</span></div>
+<div class="line"><span class="comment">*</span></div>
+<div class="line"><span class="comment">*       USB0_0_IRQHandler</span></div>
+<div class="line"><span class="comment">*  Function description</span></div>
+<div class="line"><span class="comment">*    USB IRQ Handler</span></div>
+<div class="line"><span class="comment">*</span></div>
+<div class="line"><span class="comment">*/</span></div>
+<div class="line"><span class="keywordtype">void</span> USB0_0_IRQHandler(<span class="keywordtype">void</span>)</div>
+<div class="line">{</div>
+<div class="line">    (p_usb_isr_handler)();</div>
+<div class="line">}</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">/* Register this function as a callback in USBD_SetISREnableFunc(). */</span></div>
+<div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> enable_isr(USB_ISR_HANDLER * pfISRHandler)</div>
+<div class="line">{</div>
+<div class="line">    p_usb_isr_handler = pfISRHandler;</div>
+<div class="line">    NVIC_SetPriority(USB0_0_IRQn, USBD_ISR_PRIO);</div>
+<div class="line">    NVIC_EnableIRQ(USB0_0_IRQn);</div>
+<div class="line">}</div>
+</div><!-- fragment --></li>
+</ul>
+<h3><a class="anchor" id="section_emusb_device_hw_dep_add_conf_cat3_stack"></a>
+CAT3 Specific Configuration</h3>
+<p >Some of CAT3 devices features, which affect the USB functionality are implemented outside of USB IP block and can not be configured inside emUSB-Device middleware. These features include: enable/disable power to the USB IP block, enable/disable reset state for the USB IP block and enable/disable the pull-up resistor. All mentioned features can be configured by SCU driver from mtb-xmclib-cat3.</p>
+<p >Additional USB configuration steps for CAT3 devices:</p><ol type="1">
+<li>Enable the power for USB by using <em>XMC_SCU_POWER_EnableUsb()</em>.</li>
+<li>De-assert Reset from USB controller by calling <em>XMC_SCU_RESET_DeassertPeripheralReset(XMC_SCU_PERIPHERAL_RESET_USB0)</em> for executing the USB functionality.</li>
+<li>Create the callback function which enable USB weak pull-up resistor by <em>XMC_SCU_PCU_EnableUsbPullUp()</em> as it shown in the following code snippet. <div class="fragment"><div class="line"><span class="comment">/*********************************************************************</span></div>
+<div class="line"><span class="comment">*</span></div>
+<div class="line"><span class="comment">*       hw_attach</span></div>
+<div class="line"><span class="comment">*  Function description</span></div>
+<div class="line"><span class="comment">*    Enable USB weak pull-up at PADN state</span></div>
+<div class="line"><span class="comment">*</span></div>
+<div class="line"><span class="comment">*/</span></div>
+<div class="line"><span class="keyword">static</span> <span class="keywordtype">void</span> hw_attach(<span class="keywordtype">void</span>)</div>
+<div class="line">{</div>
+<div class="line">    XMC_SCU_PCU_EnableUsbPullUp();</div>
+<div class="line">}</div>
+</div><!-- fragment --> The described callback is registers into <em>USBD_SetAttachFunc()</em>. <dl class="section note"><dt>Note</dt><dd>It is recommended to enable pull-up only inside a callback registered by USBD_SetAttachFunc().</dd></dl>
+Those steps are already implemented in usbd_config.c for CAT3 devices. You can use this file as reference.</li>
+</ol>
+<h2><a class="anchor" id="section_emusb_device_debug_mes_out"></a>
 Debug Message Output</h2>
 <p >The debug builds of emUSB-Device allow using the debug message outputs. The template implementation of the message output functions is in export/Config/usbd_config_io.c file. This file is automatically copied into the ModusToolbox project when emUSB-Device middleware is added for the first time by the Library manager. Otherwise, copy this file manually. By default, <a href="https://github.com/Infineon/retarget-io"><b>retarget-io</b></a> is used for the message output, but message outputs can be redefined to any suitable output way. To disable the default message outputs, set USBD_DISABLE_STANDARD_OUTPUT=1 in the DEFINES variable in the application project Makefile. To provide a custom output method in addition to setting a variable add corresponding API under the #if (USBD_DISABLE_STANDARD_OUTPUT == 1U) condition inside the _puts() function.</p>
 <p >For details on Hardware Debug Message Output, refer to the - <a href="./../UM09001_emUSBD.pdf"><b>SEGGER emUSB-Device User Guide &amp; Reference Manual</b></a> Debugging chapter.</p>
@@ -694,6 +806,8 @@ Low Power Support</h2>
 <th>Device family</th><th>Recommended low-power mode </th></tr>
 <tr>
 <td>CAT1A </td><td>Deep Sleep  </td></tr>
+<tr>
+<td>CAT3 </td><td>Deep Sleep  </td></tr>
 </table>
 <dl class="section note"><dt>Note</dt><dd>After a wake-up from low-power modes in which USB IP block cannot operate, the emUSB-Device must be re-initialized (Except Deep Sleep mode for CAT1A device).</dd></dl>
 <p><b> CAT1A Devices Family </b></p>
@@ -767,7 +881,12 @@ Low Power Support</h2>
 <div class="line">    <span class="comment">/* Wait up to 10 milliseconds for updating emUSB-Device state */</span></div>
 <div class="line">    USB_OS_Delay(10);</div>
 <div class="line">}</div>
-</div><!-- fragment --><h3><a class="anchor" id="section_emusb_device_low_power_rtos"></a>
+</div><!-- fragment --><p ><b> CAT3 Devices Family </b></p>
+<p >The USB IP block can operate in Active, Sleep, and Deep Sleep mode. For Sleep and Deep Sleep modes, the USB IP block clocking must remain active. This means that USB Phy Clock and System Clock must be enabled during low-power modes. After detecting Resume condition, the CAT3 device exits Deep Sleep mode (The USB interrupt wake-up microcontroller) and enters Active power mode.</p>
+<p >If Suspend condition is detected, the device goes to Deep Sleep mode but the USB remains enabled. Example of configuration CAT3 device with enabled USB during Deep Sleep mode: </p><div class="fragment"><div class="line">    XMC_SCU_CLOCK_SetDeepSleepConfig(XMC_SCU_CLOCK_DEEPSLEEP_MODE_CONFIG_ENABLE_USB);</div>
+<div class="line">    XMC_SCU_POWER_WaitForInterrupt(XMC_SCU_POWER_MODE_DEEPSLEEP, <span class="keyword">false</span>);</div>
+</div><!-- fragment --> <dl class="section note"><dt>Note</dt><dd>You can disable/enable the clock sources in Deep Sleep power mode by adding the appropriate clock source into XMC_SCU_CLOCK_SetDeepSleepConfig().</dd></dl>
+<h3><a class="anchor" id="section_emusb_device_low_power_rtos"></a>
 emUSB-Device in RTOS environment</h3>
 <p >Typically, RTOS decide to go to Idle state when no active tasks remain active. Often, the transition into Idle condition is accompanied by entering the microcontroller in one of low-power modes (Depends on RTOS configuration). But the USB device must provide correct responses to all events on the USB bus. The preventing mechanism must be implemented, which does not allow the microcontroller to enter low-power mode when emUSB-Device is not in Suspended state. For example, for FreeRTOS, a custom implementation of vApplicationSleep() must be provided.</p>
 <h3><a class="anchor" id="section_emusb_device_low_power_lpm"></a>
@@ -777,13 +896,13 @@ Link Power Management (LPM)</h3>
 <li>Call the USBD_UseV210() function in USBD_X_Config().</li>
 <li>(optional) Set the recommended BESL values by USBD_SetBESLValues().</li>
 <li>Register the callback, which reports on the LPM state transition by USBD_SetOnLPMChange().</li>
+<li>Define the behavior of the device on LPM request from the Host by USBD_SetLPMResponse() (reject or acknowledge LPM request).</li>
 </ol>
 <p >Based on the received BESL value, the application can determine the level of the power optimization and select appropriate low-power modes. The behavior of the USB IP block during low-power modes for each device described in <a class="el" href="index.html#section_emusb_device_low_power">Low Power Support</a>.</p>
-<dl class="section note"><dt>Note</dt><dd>For the CAT1A device, USB_DRIVER_Cypress_PSoC6_SysTick() must be called every millisecond and USB_DRIVER_Cypress_PSoC6_Resume() after a wake-up from Deep Sleep as well as for Suspend functionality.</dd>
-<dd>
-The rejection of the transition to L1 by the NYET response to the LPM token is not supported by emUSB-Device.</dd></dl>
+<dl class="section note"><dt>Note</dt><dd>For the CAT1A device, USB_DRIVER_Cypress_PSoC6_SysTick() must be called every millisecond and USB_DRIVER_Cypress_PSoC6_Resume() after a wake-up from Deep Sleep as well as for Suspend functionality.</dd></dl>
 <p>For more information about LPM, refer to "USB 2.0 Link Power Management
 Addendum" and "Errata for USB 2.0 ECN: Link Power Management (LPM) - 7/2007" from usb.org.</p>
+<dl class="section note"><dt>Note</dt><dd>CAT3 devices do not support LPM features.</dd></dl>
 <h2><a class="anchor" id="section_emusb_device_pick_lib"></a>
 Picking an emUSB-Device Library Variant</h2>
 <p >The Middleware provides emUSB-Device as pre-build libraries. The pre-build libraries are selected automatically based on configurations of Makefile configurations. The table below shows the availability of the configuration options.</p>
@@ -791,20 +910,51 @@ Picking an emUSB-Device Library Variant</h2>
 <tr>
 <th>Configuration</th><th>Options</th><th>Make Variable </th></tr>
 <tr>
-<td>Device family </td><td>CAT1A </td><td>DEVICE_COMPONENTS  </td></tr>
+<td>Device family </td><td>CAT1A, CAT3 </td><td>DEVICE_COMPONENTS  </td></tr>
 <tr>
 <td>Build configuration </td><td>Debug, Release </td><td>CONFIG  </td></tr>
 <tr>
-<td>Core </td><td>CM0P, CM4 for CAT1A </td><td>CORE  </td></tr>
+<td>Core </td><td><ul>
+<li>CM0P, CM4 for CAT1A;</li>
+<li>CM4 for CAT3;  </li>
+</ul>
+</td><td>CORE  </td></tr>
 <tr>
 <td>Floating point </td><td>hardfp, softfp </td><td>VFP_SELECT  </td></tr>
 <tr>
 <td>Toolchain </td><td>GCC_ARM, IAR, ARM </td><td>TOOLCHAIN  </td></tr>
 </table>
+<dl class="section warning"><dt>Warning</dt><dd>CAT3 device family supports only GCC_ARM compiler</dd></dl>
 <dl class="section note"><dt>Note</dt><dd>Typically, the device family and core are selected in BSP Makefile.</dd>
 <dd>
 CM0P supports only softfp.</dd></dl>
-<p>The header file USBD_ConfDefaults.h under the USBD directory contains common configuration used in the libraries generation. Similarly, USBD_Conf.h under each COMPONENT_&lt;Device family&gt;/CONFIG_&lt; Build configuration&gt; directory contains configuration specific to the set of library variants.</p>
+<h3><a class="anchor" id="section_emusb_device_lib_conf"></a>
+Pre-build libraries configuration</h3>
+<p >Some of the parameters/features of emUSB-Device are configured by the compile-time options (like the number of the interface that supports the ISO transfer, etc) during generation of pre-build libraries and cannot change in run-time. Header file USBD_ConfDefaults.h under the USBD directory contains the common compile time options used during pre-build libraries creation. Similarly, USBD_Conf.h under each COMPONENT_&lt;Device family&gt;/CONFIG_&lt; Build configuration&gt; directory contains the compile time options specific to the set of library variants. The compile time options defined in USBD_Conf.h have a higher priority than in USBD_ConfDefaults.h. Most of the compile time options are defined in these two header files but some are not visible like the macro, which define the number of interfaces. This section describes the compile time options not defined in USBD_Conf.h and USBD_ConfDefaults.h.</p>
+<p >This table shows the number of supported interfaces for each class between the device families.</p>
+<table class="doxtable">
+<tr>
+<th>USB Class</th><th>CAT1A</th><th>CAT3 </th></tr>
+<tr>
+<td>Audio </td><td>1 </td><td>1  </td></tr>
+<tr>
+<td>Bulk </td><td>4 </td><td>3  </td></tr>
+<tr>
+<td>CDC </td><td>2 </td><td>2  </td></tr>
+<tr>
+<td>HID </td><td>2 </td><td>2  </td></tr>
+<tr>
+<td>MSD </td><td>1 </td><td>1  </td></tr>
+<tr>
+<td>MTP </td><td>1 </td><td>1  </td></tr>
+<tr>
+<td>Printer </td><td>1 </td><td>1  </td></tr>
+<tr>
+<td>VirtualMSD </td><td>1 </td><td>1  </td></tr>
+<tr>
+<td>VSC </td><td>Limited by USB_MAX_NUM_IF </td><td>Limited by USB_MAX_NUM_IF  </td></tr>
+</table>
+<dl class="section note"><dt>Note</dt><dd>The MSD and MTP classes support the connection to up-to-four logical/storage units.</dd></dl>
 <h2><a class="anchor" id="section_emusb_device_use_in_rtos"></a>
 Using emUSB-Device in an RTOS Environment</h2>
 <p >The emUSB-device has been already implemented the Target OS Interface for both RTOS and non-RTOS aware environments. Selecting the OS layer implementation is automatic based on the <em>RTOS_AWARE</em> component. To inform the emUSB-Device that an RTOS environment is being used, set the <em>RTOS_AWARE</em> component (<em>COMPONENTS+=RTOS_AWARE</em>).</p>
@@ -813,7 +963,19 @@ Using emUSB-Device in an RTOS Environment</h2>
 <li>
 USB_OS_DecRI() and USB_OS_IncDI() have only alternate implementation because the USBD_OS_USE_USBD_X_INTERRUPT compile time option is enabled. Alternate implementation is more effective compared to the standard one because it allows disabling/enabling USB interrupts only before entering/exiting the critical section for emUSB-device.  </li>
 <li>
+The emUSB-Device middleware calls some functions of the OS layer from the USB interrupt. As a result, the USB interrupt priority must be aligned with the RTOS configuration. For example, for FreeRTOS, the USB interrupt must have a lower or equal priority to the MAX_API_CALL_INTERRUPT_PRIORITY macro.  </li>
+<li>
 <p class="startli">For non-RTOS environments: For <b>CAT1A</b> devices: USB_OS_GetTickCnt() configures one instance of the timer by <code>Timer (Timer/Counter)</code> Driver of HAL library for returning the current system time in milliseconds. The timer is started by initializing the emUSB-Device middleware.</p>
+<p class="interli">To use USB_OS_GetTickCnt() with <b>CAT3</b> devices:</p><ol type="1">
+<li>Enable emUSB OS Timer personality in the Device <em>Configurator-&gt;Peripherals-&gt;Digital-&gt;CCU4</em> section: <div class="image">
+<img src="cat3_emusb_os_timer_section.png" alt=""/>
+</div>
+</li>
+<li>Select the <em>Device</em> mode of emUSB personality. Select the CCU4 configured as emUSB OS Timer from the drop down list of "CCU for OS" section of emUSB personality. <div class="image">
+<img src="cat3_emusb_device_os.png" alt=""/>
+</div>
+ USB_OS_GetTickCnt() configures the 1 millisecond timer using CCU4 driver reserved by emUSB OS Timer personality. The interrupt priority of reserved CCU4 is 63.</li>
+</ol>
 <p class="interli">USB_OS_GetTickCnt() own implementation can be provided due to: </p><ul>
 <li>
 The optimization of handling the ISR routine (the timer generates an interrupt every 1 millisecond);  </li>
@@ -823,7 +985,7 @@ Providing more reliable implementation (the timer value reloads every 49 days, 1
 The optimization of the HW resources usage (one instance of the TCPWM counter or similar HW resources, which can be used by <code>Timer (Timer/Counter)</code> Driver);  </li>
 </ul>
 <p>To do that, set the USBD_NORTOS_TICKCNT_ENABLE macro value to zero in Makefile file.</p>
-<dl class="section note"><dt>Note</dt><dd><b>For CAT1A devices:</b> The own implementation of USB_OS_GetTickCnt() must be provided if the application uses the transit into Deep Sleep or Hibernate low-power modes.  </dd></dl>
+<dl class="section note"><dt>Note</dt><dd><b>For CAT1A</b> The own implementation of USB_OS_GetTickCnt() must be provided if the application uses the transit into Deep Sleep or Hibernate low-power modes.  </dd></dl>
 </li>
 <li>
 For Free-RTOS, USB tasks priority must be lower than the priority of RTOS daemon tasks (also known as timer service tasks). The RTOS daemon task priority is defined in configTIMER_TASK_PRIORITY.  </li>
@@ -843,6 +1005,14 @@ Changelog</h1>
 <table class="doxtable">
 <tr>
 <th>Version</th><th>Changes</th><th>Reason for Change </th></tr>
+<tr>
+<td rowspan="4">1.2.0 </td><td>Provided support for CAT3 devices. </td><td></td></tr>
+<tr>
+<td>Updated the emUSB-Device stack to 3.60.1 </td><td>New version is available  </td></tr>
+<tr>
+<td>Added a new section in the documentation <a class="el" href="index.html#section_emusb_device_lib_conf">Pre-build libraries configuration</a>  </td><td></td></tr>
+<tr>
+<td>Minors improvements in OS layer </td><td></td></tr>
 <tr>
 <td rowspan="8">1.1.0 </td><td>Updated the emUSB-Device stack to 3.58.0 </td><td>New version is available  </td></tr>
 <tr>

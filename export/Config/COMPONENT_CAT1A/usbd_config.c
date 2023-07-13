@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.58.0                                *
+*       emUSB-Device version: V3.60.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -52,7 +52,7 @@ SUA period:               2022-05-12 - 2024-05-19
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File        : usbd_config.c
-Purpose     : emUSB-Device configuration file for PSoC6
+Purpose     : emUSB-Device configuration file for CAT1A device
 --------  END-OF-HEADER  ---------------------------------------------
 */
 
@@ -95,7 +95,7 @@ static void enable_isr(USB_ISR_HANDLER * pfISRHandler)
 *       USBD_X_Config
 *
 *  Function description
-*    Configure the USB stack. This function is always called from 
+*    Configure the USB stack. This function is always called from
 *    USBD_Init().
 *
 */

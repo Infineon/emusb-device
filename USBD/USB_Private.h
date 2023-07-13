@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.58.0                                *
+*       emUSB-Device version: V3.60.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -101,7 +101,11 @@ Purpose : Private USB include file.
 #define USB_DRIVER_CMD_GET_EXIT_LATENCY        12
 #define USB_DRIVER_CMD_CHECK_MAX_PACKET_SIZE   13
 #define USB_DRIVER_CMD_SET_ALT_PACKET_SIZE     14
+#define USB_DRIVER_CMD_SET_LPM_RESPONSE        15
 
+//
+// Test Mode Selectors (USB 2.0 spec Table 9-7)
+//
 #define USB_CMD_TESTMODE_TEST_J                 1u
 #define USB_CMD_TESTMODE_TEST_K                 2u
 #define USB_CMD_TESTMODE_TEST_SE0_NAK           3u
@@ -155,6 +159,7 @@ union USB_IOCTL_PARA_t {
   U32              MemAlignment;
   I8               LPM_Enable;
   U32              LPM_Config;
+  U8               LPM_Response;
   struct {
     void         * pMem;
     U32            MemSize;

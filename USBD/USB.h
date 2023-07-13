@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.58.0                                *
+*       emUSB-Device version: V3.60.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -73,7 +73,7 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 */
 
 /* USB system version */
-#define USB_VERSION  35800uL // Format: Mmmrr Example: 35601uL is 3.56.1
+#define USB_VERSION  36001uL // Format: Mmmrr Example: 35601uL is 3.56.1
 
 
 /*********************************************************************
@@ -656,6 +656,7 @@ void     USBD_SetAllowRemoteWakeUp      (U8 AllowRemoteWakeup);
 void     USBD_UseV210                   (void);
 void     USBD_SetBESLValues             (int BaselineBESL, int DeepBESL);
 void     USBD_SetOnLPMChange            (USB_ON_LPM_CHANGE * pfOnLPMChange);
+void     USBD_SetLPMResponse            (U8 Response);
 int      USBD_TxIsPending               (unsigned EPIndex);
 
 unsigned USBD_GetMaxPacketSize          (unsigned EPIndex);
@@ -902,11 +903,14 @@ void USB_DRIVER_SH726A_ConfigAddr     (U32 BaseAddr);
 void USB_DRIVER_KinetisEHCI_ConfigAddr(U32 BaseAddr);
 void USB_DRIVER_iMXRT10xx_ConfigAddr  (U32 BaseAddr);
 void USB_DRIVER_Zynq7010_ConfigAddr   (U32 BaseAddr);
+void USB_DRIVER_STM32H5xx_ConfigAddr  (U32 RegBaseAddr, U32 RamBaseAddr);
 
 void USB_DRIVER_STM32F7xxHS_ConfigPHY(U8 UsePHY);
 void USB_DRIVER_STM32F4xxHS_ConfigPHY(U8 UsePHY);
 
 int USB_DRIVER_STM32L4xx_DetectChargingPort(void);
+
+void USB_DRIVER_STM32U5xx_ConfigAddr(U32 RegBaseAddr, U32 RamBaseAddr);
 
 void USB_DRIVER_LPC546xx_Workaround(void);
 void USB_DRIVER_SYNERGYHS_ConfigPara(U16 PhySetVal, U16 BusWaitVal);
@@ -936,68 +940,68 @@ void USB_DRIVER_Cypress_PSoC6_Resume(void);
 *       Available target USB drivers
 *
 */
-#define USB_Driver_AtmelCAP9            USB_Driver_Atmel_CAP9
-#define USB_Driver_AtmelSAM3U           USB_Driver_Atmel_SAM3U
-#define USB_Driver_AtmelRM9200          USB_Driver_Atmel_RM9200
-#define USB_Driver_AtmelSAM7A3          USB_Driver_Atmel_SAM7A3
-#define USB_Driver_AtmelSAM7S           USB_Driver_Atmel_SAM7S
-#define USB_Driver_AtmelSAM7SE          USB_Driver_Atmel_SAM7SE
-#define USB_Driver_AtmelSAM7X           USB_Driver_Atmel_SAM7X
-#define USB_Driver_AtmelSAM9260         USB_Driver_Atmel_SAM9260
-#define USB_Driver_AtmelSAM9261         USB_Driver_Atmel_SAM9261
-#define USB_Driver_AtmelSAM9263         USB_Driver_Atmel_SAM9263
-#define USB_Driver_AtmelSAM9G45         USB_Driver_Atmel_SAM9G45
-#define USB_Driver_AtmelSAM9G20         USB_Driver_Atmel_SAM9G20
-#define USB_Driver_AtmelSAM9Rx64        USB_Driver_Atmel_SAM9Rx64
-#define USB_Driver_AtmelSAM9XE          USB_Driver_Atmel_SAM9XE
-#define USB_Driver_NXPLPC13xx           USB_Driver_NXP_LPC13xx
-#define USB_Driver_NXPLPC17xx           USB_Driver_NXP_LPC17xx
-#define USB_Driver_NXPLPC214x           USB_Driver_NXP_LPC214x
-#define USB_Driver_NXPLPC23xx           USB_Driver_NXP_LPC23xx
-#define USB_Driver_NXPLPC24xx           USB_Driver_NXP_LPC24xx
-#define USB_Driver_NXPLPC288x           USB_Driver_NXP_LPC288x
-#define USB_Driver_NXPLPC318x           USB_Driver_NXP_LPC318x
-#define USB_Driver_NXPLPC313x           USB_Driver_NXP_LPC313x
-#define USB_Driver_STSTM32              USB_Driver_ST_STM32
-#define USB_Driver_STSTM32F107          USB_Driver_ST_STM32F107
-#define USB_Driver_STSTR71x             USB_Driver_ST_STR71x
-#define USB_Driver_STSTR750             USB_Driver_ST_STR750
-#define USB_Driver_STSTR91x             USB_Driver_ST_STR91x
-#define USB_Driver_TMPA910              USB_Driver_Toshiba_TMPA910
-#define USB_Driver_TMPA900              USB_Driver_Toshiba_TMPA900
-#define USB_Driver_SH7203               USB_Driver_Renesas_SH7203
-#define USB_Driver_SH7216               USB_Driver_Renesas_SH7216
-#define USB_Driver_SH7286               USB_Driver_Renesas_SH7286
-#define USB_Driver_Renesas_RX62N        USB_Driver_Renesas_RX
-#define USB_Driver_Renesas_RX63N        USB_Driver_Renesas_RX
-#define USB_Driver_Renesas_RX64M        USB_Driver_Renesas_RX
-#define USB_Driver_Renesas_RX65N        USB_Driver_Renesas_RX
-#define USB_Driver_Renesas_RX71M        USB_Driver_Renesas_RX
-#define USB_Driver_Renesas_RX71M_FS     USB_Driver_Renesas_RX
-#define USB_Driver_Renesas_RX71M_HS     USB_Driver_Renesas_SynergyHS
-#define USB_Driver_Renesas_RA_FS        USB_Driver_Renesas_SynergyFS
-#define USB_Driver_Renesas_RA_HS        USB_Driver_Renesas_SynergyHS
-#define USB_Driver_Renesas_SH7269       USB_Driver_Renesas_SH7268
-#define USB_Driver_Atmel_SAM9X35        USB_Driver_Atmel_SAM9X25
-#define USB_Driver_Atmel_SAMA5Dx        USB_Driver_Atmel_SAMA5D3x
-#define USB_Driver_ST_STM32             USB_Driver_ST_STM32x32
-#define USB_Driver_ST_STM32F3xx6        USB_Driver_ST_STM32x16
-#define USB_Driver_ST_STM32F3xx8        USB_Driver_ST_STM32x16
-#define USB_Driver_ST_STM32F3xxB        USB_Driver_ST_STM32x32
-#define USB_Driver_ST_STM32F3xxC        USB_Driver_ST_STM32x32
-#define USB_Driver_ST_STM32F3xxD        USB_Driver_ST_STM32x16
-#define USB_Driver_ST_STM32F3xxE        USB_Driver_ST_STM32x16
-#define USB_Driver_ST_STM32F0           USB_Driver_ST_STM32F0xx
-#define USB_Driver_Freescale_K40        USB_Driver_Freescale_KHCI
-#define USB_Driver_Freescale_K60        USB_Driver_Freescale_KHCI
-#define USB_Driver_Freescale_K70        USB_Driver_Freescale_KHCI
-#define USB_Driver_Renesas_SynergyS3_FS USB_Driver_Renesas_SynergyFS
-#define USB_Driver_Renesas_SynergyS5_FS USB_Driver_Renesas_SynergyFS
-#define USB_Driver_Renesas_SynergyS7_FS USB_Driver_Renesas_SynergyFS
-#define USB_Driver_Renesas_RX200        USB_Driver_Renesas_RX100
-#define USB_Driver_SiLabs_EFM32GG11     USB_Driver_EM_EFM32GG990
-#define USB_Driver_Infineon_XMC42xx     USB_Driver_Infineon_XMC45xx
-
+#define USB_Driver_AtmelCAP9               USB_Driver_Atmel_CAP9
+#define USB_Driver_AtmelSAM3U              USB_Driver_Atmel_SAM3U
+#define USB_Driver_AtmelRM9200             USB_Driver_Atmel_RM9200
+#define USB_Driver_AtmelSAM7A3             USB_Driver_Atmel_SAM7A3
+#define USB_Driver_AtmelSAM7S              USB_Driver_Atmel_SAM7S
+#define USB_Driver_AtmelSAM7SE             USB_Driver_Atmel_SAM7SE
+#define USB_Driver_AtmelSAM7X              USB_Driver_Atmel_SAM7X
+#define USB_Driver_AtmelSAM9260            USB_Driver_Atmel_SAM9260
+#define USB_Driver_AtmelSAM9261            USB_Driver_Atmel_SAM9261
+#define USB_Driver_AtmelSAM9263            USB_Driver_Atmel_SAM9263
+#define USB_Driver_AtmelSAM9G45            USB_Driver_Atmel_SAM9G45
+#define USB_Driver_AtmelSAM9G20            USB_Driver_Atmel_SAM9G20
+#define USB_Driver_AtmelSAM9Rx64           USB_Driver_Atmel_SAM9Rx64
+#define USB_Driver_AtmelSAM9XE             USB_Driver_Atmel_SAM9XE
+#define USB_Driver_NXPLPC13xx              USB_Driver_NXP_LPC13xx
+#define USB_Driver_NXPLPC17xx              USB_Driver_NXP_LPC17xx
+#define USB_Driver_NXPLPC214x              USB_Driver_NXP_LPC214x
+#define USB_Driver_NXPLPC23xx              USB_Driver_NXP_LPC23xx
+#define USB_Driver_NXPLPC24xx              USB_Driver_NXP_LPC24xx
+#define USB_Driver_NXPLPC288x              USB_Driver_NXP_LPC288x
+#define USB_Driver_NXPLPC318x              USB_Driver_NXP_LPC318x
+#define USB_Driver_NXPLPC313x              USB_Driver_NXP_LPC313x
+#define USB_Driver_STSTM32                 USB_Driver_ST_STM32
+#define USB_Driver_STSTM32F107             USB_Driver_ST_STM32F107
+#define USB_Driver_STSTR71x                USB_Driver_ST_STR71x
+#define USB_Driver_STSTR750                USB_Driver_ST_STR750
+#define USB_Driver_STSTR91x                USB_Driver_ST_STR91x
+#define USB_Driver_TMPA910                 USB_Driver_Toshiba_TMPA910
+#define USB_Driver_TMPA900                 USB_Driver_Toshiba_TMPA900
+#define USB_Driver_SH7203                  USB_Driver_Renesas_SH7203
+#define USB_Driver_SH7216                  USB_Driver_Renesas_SH7216
+#define USB_Driver_SH7286                  USB_Driver_Renesas_SH7286
+#define USB_Driver_Renesas_RX62N           USB_Driver_Renesas_RX
+#define USB_Driver_Renesas_RX63N           USB_Driver_Renesas_RX
+#define USB_Driver_Renesas_RX64M           USB_Driver_Renesas_RX
+#define USB_Driver_Renesas_RX65N           USB_Driver_Renesas_RX
+#define USB_Driver_Renesas_RX71M           USB_Driver_Renesas_RX
+#define USB_Driver_Renesas_RX71M_FS        USB_Driver_Renesas_RX
+#define USB_Driver_Renesas_RX71M_HS        USB_Driver_Renesas_SynergyHS
+#define USB_Driver_Renesas_RA_FS           USB_Driver_Renesas_SynergyFS
+#define USB_Driver_Renesas_RA_HS           USB_Driver_Renesas_SynergyHS
+#define USB_Driver_Renesas_SH7269          USB_Driver_Renesas_SH7268
+#define USB_Driver_Atmel_SAM9X35           USB_Driver_Atmel_SAM9X25
+#define USB_Driver_Atmel_SAMA5Dx           USB_Driver_Atmel_SAMA5D3x
+#define USB_Driver_ST_STM32                USB_Driver_ST_STM32x32
+#define USB_Driver_ST_STM32F3xx6           USB_Driver_ST_STM32x16
+#define USB_Driver_ST_STM32F3xx8           USB_Driver_ST_STM32x16
+#define USB_Driver_ST_STM32F3xxB           USB_Driver_ST_STM32x32
+#define USB_Driver_ST_STM32F3xxC           USB_Driver_ST_STM32x32
+#define USB_Driver_ST_STM32F3xxD           USB_Driver_ST_STM32x16
+#define USB_Driver_ST_STM32F3xxE           USB_Driver_ST_STM32x16
+#define USB_Driver_ST_STM32F0              USB_Driver_ST_STM32F0xx
+#define USB_Driver_Freescale_K40           USB_Driver_Freescale_KHCI
+#define USB_Driver_Freescale_K60           USB_Driver_Freescale_KHCI
+#define USB_Driver_Freescale_K70           USB_Driver_Freescale_KHCI
+#define USB_Driver_Renesas_SynergyS3_FS    USB_Driver_Renesas_SynergyFS
+#define USB_Driver_Renesas_SynergyS5_FS    USB_Driver_Renesas_SynergyFS
+#define USB_Driver_Renesas_SynergyS7_FS    USB_Driver_Renesas_SynergyFS
+#define USB_Driver_Renesas_RX200           USB_Driver_Renesas_RX100
+#define USB_Driver_SiLabs_EFM32GG11        USB_Driver_EM_EFM32GG990
+#define USB_Driver_Infineon_XMC42xx        USB_Driver_Infineon_XMC45xx
+#define USB_Driver_ST_STM32U5xx_FS_DynMem  USB_Driver_ST_STM32U5xx_FS
 
 extern const USB_HW_DRIVER USB_Driver_AlifSemi_E1;
 extern const USB_HW_DRIVER USB_Driver_Atmel_AT32UC3x;
@@ -1063,6 +1067,7 @@ extern const USB_HW_DRIVER USB_Driver_NXP_LPC55xxx_FS;
 extern const USB_HW_DRIVER USB_Driver_NXP_iMXRT10xx;
 extern const USB_HW_DRIVER USB_Driver_NXP_iMXRT10xx_DynMem;
 extern const USB_HW_DRIVER USB_Driver_NXP_iMXRT5xx;
+extern const USB_HW_DRIVER USB_Driver_NXP_iMXRT6xx;
 extern const USB_HW_DRIVER USB_Driver_RP_2040;
 extern const USB_HW_DRIVER USB_Driver_Renesas_H8SX1668R;
 extern const USB_HW_DRIVER USB_Driver_Renesas_H8S2472;
@@ -1103,8 +1108,10 @@ extern const USB_HW_DRIVER USB_Driver_ST_STM32H7xxHS_inFS_DynMem;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32L4xx;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32L4x2;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32L5x2;
-extern const USB_HW_DRIVER USB_Driver_ST_STM32U5xx;
-extern const USB_HW_DRIVER USB_Driver_ST_STM32U5xx_DynMem;
+extern const USB_HW_DRIVER USB_Driver_ST_STM32H5xx;
+extern const USB_HW_DRIVER USB_Driver_ST_STM32U5xx_FS;
+extern const USB_HW_DRIVER USB_Driver_ST_STM32U5xx_HS;
+extern const USB_HW_DRIVER USB_Driver_ST_STM32U5xx_NG;
 extern const USB_HW_DRIVER USB_Driver_ST_STR71x;
 extern const USB_HW_DRIVER USB_Driver_ST_STR750;
 extern const USB_HW_DRIVER USB_Driver_ST_STR91x;

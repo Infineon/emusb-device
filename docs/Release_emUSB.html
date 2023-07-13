@@ -4,7 +4,7 @@
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>Release notes for emUSB-Device V3.58.0         </title>
+  <title>Release notes for emUSB-Device V3.60.1         </title>
   <meta name="robots" content="noindex,nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style type="text/css">
@@ -208,7 +208,7 @@
         <div class="claim">The Embedded Experts</div>
         <div class="head">
           <div class="container">
-            <h1>Release notes for emUSB-Device V3.58.0         </h1>
+            <h1>Release notes for emUSB-Device V3.60.1         </h1>
           </div>
         </div>
       </div>
@@ -216,6 +216,46 @@
     <!-- ****************************************************************** -->
     <!-- History                                                            -->
     <!-- ****************************************************************** -->
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.60.1 [30. Jun 2023]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for NXP iMX RT685 devices.</li>
+            <li>XHCI driver: Support for USB test mode added.</li>
+            <li>XHCI driver: Support for SOF callback added.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>USB NI driver for emNet (RNDIS): added counter for "no buffer" errors.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>Synopsys DWC2 driver: Remote wakeup did not work correctly. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.60.0 [13. Apr 2023]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>Added support for STM32H5xx devices.</li>
+            <li>Add new function USBD_SetLPMResponse().</li>
+            <li>LPC54xxx, LPC55xxx driver can now detect USB disconnect via VBUS pin.</li>
+            <li>ATSAMV7x driver now supports USB test mode.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>MTP: It was possible for USBD_MTP_Poll() to block indefinitely in the rare case were we stalled a request and the PC did not clear the stall condition. Fixed.</li>
+            <li>IP-over-USB: Unplug and re-plug the device from a Windows computer could result that after re-plugging the USB device is not recognize properly. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
     <div class="divider-global">
       <div class="container">
         <h2>Version 3.58.0 [28. Feb 2023]</h2>

@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.58.0                                *
+*       emUSB-Device version: V3.60.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -118,7 +118,12 @@ Purpose     : Sample implementation of log and warn function
 
     #include "cyabs_rtos.h"
 
-    #include "cy_pdl.h"
+    /* For __get_IPSR() */
+    #if defined (COMPONENT_CAT3)
+        #include <cmsis_compiler.h>
+    #else
+        #include "cy_pdl.h"
+     #endif /* #ifdef COMPONENT_CAT3 */
 #endif
 
 #else /* Non RTOS environment */

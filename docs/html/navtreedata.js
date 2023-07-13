@@ -37,14 +37,17 @@ var NAVTREE =
         [ "Hardware-dependent Configuration", "index.html#section_emusb_device_hw_dep_conf", [
           [ "USB Pins Configuration", "index.html#section_emusb_device_hw_dep_conf_pins", null ],
           [ "USB Clock Configuration", "index.html#section_emusb_device_hw_dep_conf_clock", null ],
-          [ "USB Interrupt Configuration", "index.html#section_emusb_device_hw_dep_conf_int", null ]
+          [ "USB Interrupt Configuration", "index.html#section_emusb_device_hw_dep_conf_int", null ],
+          [ "CAT3 Specific Configuration", "index.html#section_emusb_device_hw_dep_add_conf_cat3_stack", null ]
         ] ],
         [ "Debug Message Output", "index.html#section_emusb_device_debug_mes_out", null ],
         [ "Low Power Support", "index.html#section_emusb_device_low_power", [
           [ "emUSB-Device in RTOS environment", "index.html#section_emusb_device_low_power_rtos", null ],
           [ "Link Power Management (LPM)", "index.html#section_emusb_device_low_power_lpm", null ]
         ] ],
-        [ "Picking an emUSB-Device Library Variant", "index.html#section_emusb_device_pick_lib", null ],
+        [ "Picking an emUSB-Device Library Variant", "index.html#section_emusb_device_pick_lib", [
+          [ "Pre-build libraries configuration", "index.html#section_emusb_device_lib_conf", null ]
+        ] ],
         [ "Using emUSB-Device in an RTOS Environment", "index.html#section_emusb_device_use_in_rtos", null ]
       ] ],
       [ "emUSB-Device Package Structure", "index.html#section_emusb_device_package_str", null ],
