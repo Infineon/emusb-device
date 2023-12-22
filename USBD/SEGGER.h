@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.60.1                                *
+*       emUSB-Device version: V3.62.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -29,7 +29,7 @@ The source code of the emUSB Device software has been licensed to Cypress
 Semiconductor Corporation, whose registered office is 198 Champion
 Court, San Jose, CA 95134, USA including the 
 right to create and distribute the object code version of 
-the emUSB Device software for its Cortex M0, M0+ and M4 based devices.
+the emUSB Device software for its Cortex M0, M0+, M4, M33 and M55 based devices.
 The object code version can be used by Cypress customers under the 
 terms and conditions of the associated End User License Agreement.
 Support for the object code version is provided by Cypress, 
@@ -44,8 +44,8 @@ Licensed SEGGER software: emUSB-Device
 License number:           USBD-00500
 License model:            Cypress Services and License Agreement, signed November 17th/18th, 2010
                           and Amendment Number One, signed December 28th, 2020 and February 10th, 2021
-                          and Amendment Number Three, signed May 2nd, 2022 and May 5th, 2022
-Licensed platform:        Cypress devices containing ARM Cortex M cores: M0, M0+, M4
+                          and Amendment Number Three, signed May 2nd, 2022 and May 5th, 2022 and Amendment Number Four, signed August 28th, 2023
+Licensed platform:        Cypress devices containing ARM Cortex M cores: M0, M0+, M4, M33 and M55
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
 SUA period:               2022-05-12 - 2024-05-19
@@ -148,6 +148,18 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 #define SEGGER_PRINTF_FLAG_PRECEED    (1 << 3)
 #define SEGGER_PRINTF_FLAG_ZEROPAD    (1 << 4)
 #define SEGGER_PRINTF_FLAG_NEGATIVE   (1 << 5)
+
+#ifndef SEGGER_IS_CORTEX_M
+  //
+  // According to ARM IHI 0053D section 'Architectural profile'
+  // __ARM_ARCH_PROFILE is set to 'M' / 77 / 0x4d on Cortex-M targets
+  //
+  #if (defined(__ARM_ARCH_PROFILE) && (__ARM_ARCH_PROFILE == 'M'))
+    #define SEGGER_IS_CORTEX_M 1
+  #else
+    #define SEGGER_IS_CORTEX_M 0
+  #endif
+#endif
 
 /*********************************************************************
 *

@@ -13,8 +13,11 @@
 * No custom USB host driver necessary
 
 ### Supported USB Device Classes:
-* Audio V1 device class
+
+* Audio
+* Legacy Audio V1 device class
 * Bulk communication
+* Smart Card Device Class (CCID)
 * Communication Device Class (CDC)
 * Human Interface Device Class (HID)
 * Mass Storage Device Class (MSD)
@@ -22,6 +25,7 @@
 * Printer Class
 * Virtual Mass Storage Component (VirtualMSD)
 * Vendor Specific Class (VSC)
+
 ## Quick Start
 
 Refer to [emUSB-Device API Reference](https://infineon.github.io/emusb-device/html/index.html) for a Quick Start Guide

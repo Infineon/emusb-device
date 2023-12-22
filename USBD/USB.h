@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.60.1                                *
+*       emUSB-Device version: V3.62.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -29,7 +29,7 @@ The source code of the emUSB Device software has been licensed to Cypress
 Semiconductor Corporation, whose registered office is 198 Champion
 Court, San Jose, CA 95134, USA including the 
 right to create and distribute the object code version of 
-the emUSB Device software for its Cortex M0, M0+ and M4 based devices.
+the emUSB Device software for its Cortex M0, M0+, M4, M33 and M55 based devices.
 The object code version can be used by Cypress customers under the 
 terms and conditions of the associated End User License Agreement.
 Support for the object code version is provided by Cypress, 
@@ -44,8 +44,8 @@ Licensed SEGGER software: emUSB-Device
 License number:           USBD-00500
 License model:            Cypress Services and License Agreement, signed November 17th/18th, 2010
                           and Amendment Number One, signed December 28th, 2020 and February 10th, 2021
-                          and Amendment Number Three, signed May 2nd, 2022 and May 5th, 2022
-Licensed platform:        Cypress devices containing ARM Cortex M cores: M0, M0+, M4
+                          and Amendment Number Three, signed May 2nd, 2022 and May 5th, 2022 and Amendment Number Four, signed August 28th, 2023
+Licensed platform:        Cypress devices containing ARM Cortex M cores: M0, M0+, M4, M33 and M55
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
 SUA period:               2022-05-12 - 2024-05-19
@@ -60,6 +60,7 @@ Purpose : USB stack API
 
 #include "SEGGER.h"
 #include "USB_ConfDefaults.h"
+#include <stddef.h>
 
 #if defined(__cplusplus)
 extern "C" {     /* Make sure we have C-declarations in C++ programs */
@@ -73,7 +74,7 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 */
 
 /* USB system version */
-#define USB_VERSION  36001uL // Format: Mmmrr Example: 35601uL is 3.56.1
+#define USB_VERSION  36200uL // Format: Mmmrr Example: 35601uL is 3.56.1
 
 
 /*********************************************************************
@@ -766,6 +767,7 @@ void USBD_Logf                          (U32 Type,       const char * sFormat, .
 void USBD_Warnf                         (U32 Type,       const char * sFormat, ...);
 void USBD_Logf_Application              (const char * sFormat, ...);
 void USBD_LogHexDump                    (U32 Type, U32 Len, const void *pvData);
+void USBD_Puts                          (const char * s);
 
 #if USB_V2_V3_MIGRATION_API > 0
 //
@@ -867,6 +869,20 @@ unsigned USBD_CalcBitsSet               (unsigned int x);
 typedef int  USB_CHECK_ADDRESS_FUNC    (const void * pMem);
 void USBD_SetCheckAddress(USB_CHECK_ADDRESS_FUNC * pfCheckValidDMAAddress);
 
+/*********************************************************************
+*
+*       USBD_V2P_FUNC
+*
+*  Description
+*    Converts a virtual address to a physical address to be used for DMA.
+*
+*  Parameters
+*    pVirtAddr : Pointer to the virtual memory location.
+*
+*  Return value
+*    Physical address.
+*/
+typedef PTR_ADDR (USBD_V2P_FUNC)(const void * pVirtAddr);
 
 /*********************************************************************
 *
@@ -920,6 +936,8 @@ void USB_DRIVER_SYNERGYFS_ConfigAddr(U32 BaseAddr);
 void USB_DRIVER_Cypress_PSoC6_SysTick(void);
 void USB_DRIVER_Cypress_PSoC6_Resume(void);
 
+void USBD_DRIVER_ALIFE1_SetV2PHandler(USBD_V2P_FUNC * pfV2PHandler);
+
 /*********************************************************************
 *
 *       Compatibility macros for configuring the base address
@@ -940,7 +958,6 @@ void USB_DRIVER_Cypress_PSoC6_Resume(void);
 *       Available target USB drivers
 *
 */
-#define USB_Driver_AtmelCAP9               USB_Driver_Atmel_CAP9
 #define USB_Driver_AtmelSAM3U              USB_Driver_Atmel_SAM3U
 #define USB_Driver_AtmelRM9200             USB_Driver_Atmel_RM9200
 #define USB_Driver_AtmelSAM7A3             USB_Driver_Atmel_SAM7A3
@@ -954,24 +971,14 @@ void USB_DRIVER_Cypress_PSoC6_Resume(void);
 #define USB_Driver_AtmelSAM9G20            USB_Driver_Atmel_SAM9G20
 #define USB_Driver_AtmelSAM9Rx64           USB_Driver_Atmel_SAM9Rx64
 #define USB_Driver_AtmelSAM9XE             USB_Driver_Atmel_SAM9XE
-#define USB_Driver_NXPLPC13xx              USB_Driver_NXP_LPC13xx
 #define USB_Driver_NXPLPC17xx              USB_Driver_NXP_LPC17xx
-#define USB_Driver_NXPLPC214x              USB_Driver_NXP_LPC214x
 #define USB_Driver_NXPLPC23xx              USB_Driver_NXP_LPC23xx
 #define USB_Driver_NXPLPC24xx              USB_Driver_NXP_LPC24xx
-#define USB_Driver_NXPLPC288x              USB_Driver_NXP_LPC288x
-#define USB_Driver_NXPLPC318x              USB_Driver_NXP_LPC318x
-#define USB_Driver_NXPLPC313x              USB_Driver_NXP_LPC313x
 #define USB_Driver_STSTM32                 USB_Driver_ST_STM32
 #define USB_Driver_STSTM32F107             USB_Driver_ST_STM32F107
-#define USB_Driver_STSTR71x                USB_Driver_ST_STR71x
-#define USB_Driver_STSTR750                USB_Driver_ST_STR750
 #define USB_Driver_STSTR91x                USB_Driver_ST_STR91x
 #define USB_Driver_TMPA910                 USB_Driver_Toshiba_TMPA910
 #define USB_Driver_TMPA900                 USB_Driver_Toshiba_TMPA900
-#define USB_Driver_SH7203                  USB_Driver_Renesas_SH7203
-#define USB_Driver_SH7216                  USB_Driver_Renesas_SH7216
-#define USB_Driver_SH7286                  USB_Driver_Renesas_SH7286
 #define USB_Driver_Renesas_RX62N           USB_Driver_Renesas_RX
 #define USB_Driver_Renesas_RX63N           USB_Driver_Renesas_RX
 #define USB_Driver_Renesas_RX64M           USB_Driver_Renesas_RX
@@ -981,7 +988,6 @@ void USB_DRIVER_Cypress_PSoC6_Resume(void);
 #define USB_Driver_Renesas_RX71M_HS        USB_Driver_Renesas_SynergyHS
 #define USB_Driver_Renesas_RA_FS           USB_Driver_Renesas_SynergyFS
 #define USB_Driver_Renesas_RA_HS           USB_Driver_Renesas_SynergyHS
-#define USB_Driver_Renesas_SH7269          USB_Driver_Renesas_SH7268
 #define USB_Driver_Atmel_SAM9X35           USB_Driver_Atmel_SAM9X25
 #define USB_Driver_Atmel_SAMA5Dx           USB_Driver_Atmel_SAMA5D3x
 #define USB_Driver_ST_STM32                USB_Driver_ST_STM32x32
@@ -1002,10 +1008,11 @@ void USB_DRIVER_Cypress_PSoC6_Resume(void);
 #define USB_Driver_SiLabs_EFM32GG11        USB_Driver_EM_EFM32GG990
 #define USB_Driver_Infineon_XMC42xx        USB_Driver_Infineon_XMC45xx
 #define USB_Driver_ST_STM32U5xx_FS_DynMem  USB_Driver_ST_STM32U5xx_FS
+#define USB_Driver_ST_STM32WB55            USB_Driver_ST_STM32L4x2
 
 extern const USB_HW_DRIVER USB_Driver_AlifSemi_E1;
+extern const USB_HW_DRIVER USB_Driver_Ambiq_Apollo4;
 extern const USB_HW_DRIVER USB_Driver_Atmel_AT32UC3x;
-extern const USB_HW_DRIVER USB_Driver_Atmel_CAP9;
 extern const USB_HW_DRIVER USB_Driver_Atmel_SAM3U;
 extern const USB_HW_DRIVER USB_Driver_Atmel_SAM3X;
 extern const USB_HW_DRIVER USB_Driver_Atmel_SAM3S;
@@ -1031,14 +1038,13 @@ extern const USB_HW_DRIVER USB_Driver_Atmel_SAMV7;
 extern const USB_HW_DRIVER USB_Driver_Atmel_SAMD21;
 extern const USB_HW_DRIVER USB_Driver_Atmel_SAMD51;
 extern const USB_HW_DRIVER USB_Driver_Cypress_PSoC6;
+extern const USB_HW_DRIVER USB_Driver_Cypress_PSoC6_DMA;
+extern const USB_HW_DRIVER USB_Driver_Cypress_MB9BFxxx;
 extern const USB_HW_DRIVER USB_Driver_EM_EFM32GG990;
-extern const USB_HW_DRIVER USB_Driver_Freescale_iMX25x;
 extern const USB_HW_DRIVER USB_Driver_Freescale_KHCI;
 extern const USB_HW_DRIVER USB_Driver_Freescale_KinetisEHCI;
-extern const USB_HW_DRIVER USB_Driver_Freescale_iMX28x;
-extern const USB_HW_DRIVER USB_Driver_Freescale_Vybrid;
-extern const USB_HW_DRIVER USB_Driver_Freescale_P1020;
-extern const USB_HW_DRIVER USB_Driver_Cypress_MB9BFxxx;
+extern const USB_HW_DRIVER USB_Driver_GD_GD32450xFS;
+extern const USB_HW_DRIVER USB_Driver_GD_GD32450xHS;
 extern const USB_HW_DRIVER USB_Driver_Infineon_XMC45xx;
 extern const USB_HW_DRIVER USB_Driver_Infineon_XMC45xx_DynMem;
 extern const USB_HW_DRIVER USB_Driver_Infineon_XMC45xx_DMA;
@@ -1047,15 +1053,10 @@ extern const USB_HW_DRIVER USB_Driver_Microsemi_SmartFusion2;
 extern const USB_HW_DRIVER USB_Driver_Nordic_nRF52xxx;
 extern const USB_HW_DRIVER USB_Driver_Nordic_nRF53xx;
 extern const USB_HW_DRIVER USB_Driver_Nordic_nRF53xx_NS;
-extern const USB_HW_DRIVER USB_Driver_NXP_LPC13xx;
 extern const USB_HW_DRIVER USB_Driver_NXP_LPC17xx;
 extern const USB_HW_DRIVER USB_Driver_NXP_LPC18xx;
-extern const USB_HW_DRIVER USB_Driver_NXP_LPC214x;
 extern const USB_HW_DRIVER USB_Driver_NXP_LPC23xx;
 extern const USB_HW_DRIVER USB_Driver_NXP_LPC24xx;
-extern const USB_HW_DRIVER USB_Driver_NXP_LPC288x;
-extern const USB_HW_DRIVER USB_Driver_NXP_LPC318x;
-extern const USB_HW_DRIVER USB_Driver_NXP_LPC313x;
 extern const USB_HW_DRIVER USB_Driver_NXP_LPC43xx;
 extern const USB_HW_DRIVER USB_Driver_NXP_LPC43xx_DynMem;
 extern const USB_HW_DRIVER USB_Driver_NXP_LPC51xxx;
@@ -1069,24 +1070,17 @@ extern const USB_HW_DRIVER USB_Driver_NXP_iMXRT10xx_DynMem;
 extern const USB_HW_DRIVER USB_Driver_NXP_iMXRT5xx;
 extern const USB_HW_DRIVER USB_Driver_NXP_iMXRT6xx;
 extern const USB_HW_DRIVER USB_Driver_RP_2040;
-extern const USB_HW_DRIVER USB_Driver_Renesas_H8SX1668R;
-extern const USB_HW_DRIVER USB_Driver_Renesas_H8S2472;
-extern const USB_HW_DRIVER USB_Driver_Renesas_RL78;
 extern const USB_HW_DRIVER USB_Driver_Renesas_RZ;
 extern const USB_HW_DRIVER USB_Driver_Renesas_RZA2;
 extern const USB_HW_DRIVER USB_Driver_Renesas_RZG1;
 extern const USB_HW_DRIVER USB_Driver_Renesas_RX;
 extern const USB_HW_DRIVER USB_Driver_Renesas_RX64M_USBA;
 extern const USB_HW_DRIVER USB_Driver_Renesas_RX100;
-extern const USB_HW_DRIVER USB_Driver_Renesas_SH7203;
-extern const USB_HW_DRIVER USB_Driver_Renesas_SH7216;
 extern const USB_HW_DRIVER USB_Driver_Renesas_SH7268;
-extern const USB_HW_DRIVER USB_Driver_Renesas_SH7286;
 extern const USB_HW_DRIVER USB_Driver_Renesas_SH726A;
 extern const USB_HW_DRIVER USB_Driver_Renesas_SynergyS1;
 extern const USB_HW_DRIVER USB_Driver_Renesas_SynergyFS;
 extern const USB_HW_DRIVER USB_Driver_Renesas_SynergyHS;
-extern const USB_HW_DRIVER USB_Driver_Renesas_uPD70F351x;
 extern const USB_HW_DRIVER USB_Driver_Renesas_R8A66597;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32x32;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32x16;
@@ -1112,30 +1106,20 @@ extern const USB_HW_DRIVER USB_Driver_ST_STM32H5xx;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32U5xx_FS;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32U5xx_HS;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32U5xx_NG;
-extern const USB_HW_DRIVER USB_Driver_ST_STR71x;
-extern const USB_HW_DRIVER USB_Driver_ST_STR750;
 extern const USB_HW_DRIVER USB_Driver_ST_STR91x;
 extern const USB_HW_DRIVER USB_Driver_TI_AM335x;
 extern const USB_HW_DRIVER USB_Driver_TI_AM335xDMA;
 extern const USB_HW_DRIVER USB_Driver_TI_LM3S9B9x;
-extern const USB_HW_DRIVER USB_Driver_TI_MSP430;
 extern const USB_HW_DRIVER USB_Driver_TI_OMAP_L138;
 extern const USB_HW_DRIVER USB_Driver_TI_TM4Cxx;
-extern const USB_HW_DRIVER USB_Driver_Toshiba_TMPM369;
 extern const USB_HW_DRIVER USB_Driver_Toshiba_TMPA900;
-extern const USB_HW_DRIVER USB_Driver_Toshiba_TMPA910;
 extern const USB_HW_DRIVER USB_Driver_Toshiba_TZ1200;
-extern const USB_HW_DRIVER USB_Driver_Xilinx_Zynq7010;
-extern const USB_HW_DRIVER USB_Driver_Xilinx_Zynq7010_DynMem;
 extern const USB_HW_DRIVER USB_Driver_DialogSemi_DA1468x;
 extern const USB_HW_DRIVER USB_Driver_DialogSemi_DA148xx;
 extern const USB_HW_DRIVER USB_Driver_Xilinx_Ultrascale0;
 extern const USB_HW_DRIVER USB_Driver_Xilinx_Ultrascale1;
 extern const USB_HW_DRIVER USB_Driver_Xilinx_Ultrascale0_R5;
 extern const USB_HW_DRIVER USB_Driver_Xilinx_Ultrascale1_R5;
-extern const USB_HW_DRIVER USB_Driver_GD_GD32450xFS;
-extern const USB_HW_DRIVER USB_Driver_GD_GD32450xHS;
-extern const USB_HW_DRIVER USB_Driver_Ambiq_Apollo4;
 
 #if defined(__cplusplus)
   }              /* Make sure we have C-declarations in C++ programs */

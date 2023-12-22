@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.60.1                                *
+*       emUSB-Device version: V3.62.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -29,7 +29,7 @@ The source code of the emUSB Device software has been licensed to Cypress
 Semiconductor Corporation, whose registered office is 198 Champion
 Court, San Jose, CA 95134, USA including the 
 right to create and distribute the object code version of 
-the emUSB Device software for its Cortex M0, M0+ and M4 based devices.
+the emUSB Device software for its Cortex M0, M0+, M4, M33 and M55 based devices.
 The object code version can be used by Cypress customers under the 
 terms and conditions of the associated End User License Agreement.
 Support for the object code version is provided by Cypress, 
@@ -44,11 +44,11 @@ Licensed SEGGER software: emUSB-Device
 License number:           USBD-00500
 License model:            Cypress Services and License Agreement, signed November 17th/18th, 2010
                           and Amendment Number One, signed December 28th, 2020 and February 10th, 2021
-                          and Amendment Number Three, signed May 2nd, 2022 and May 5th, 2022
-Licensed platform:        Cypress devices containing ARM Cortex M cores: M0, M0+, M4
+                          and Amendment Number Three, signed May 2nd, 2022 and May 5th, 2022 and Amendment Number Four, signed August 28th, 2023
+Licensed platform:        Cypress devices containing ARM Cortex M cores: M0, M0+, M4, M33 and M55
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
-SUA period:               2022-05-12 - 2024-05-18
+SUA period:               2022-05-12 - 2024-05-19
 Contact to extend SUA:    sales@segger.com
 ----------------------------------------------------------------------
 File    : USB_Conf.h
@@ -62,11 +62,13 @@ Purpose : Config file. Modify to reflect your configuration
 
 #define USB_DEBUG_LEVEL                         (0)
 #define USB_MAX_NUM_IF                          (4)
+#define USB_MAX_NUM_ALT_IF                      (12)
 #define USB_MAX_NUM_IAD                         (4)
 #define USB_MAX_NUM_MS_DESC                     (USB_MAX_NUM_IF)
 #define USB_MAX_NUM_COMPONENTS                  (USB_MAX_NUM_IF)
 #define USB_NUM_EPS                             (9)
 #define USB_SUPPORT_TRANSFER_ISO                (1)
+#define USB_DESC_BUFFER_SIZE                    (768)
 #define USBD_OS_USE_USBD_X_INTERRUPT            (1)
 
 #endif     /* Avoid multiple inclusion */

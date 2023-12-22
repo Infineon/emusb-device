@@ -45,6 +45,7 @@ var NAVTREE =
           [ "emUSB-Device in RTOS environment", "index.html#section_emusb_device_low_power_rtos", null ],
           [ "Link Power Management (LPM)", "index.html#section_emusb_device_low_power_lpm", null ]
         ] ],
+        [ "Only PDL APIs support", "index.html#section_emusb_device_only_pdl", null ],
         [ "Picking an emUSB-Device Library Variant", "index.html#section_emusb_device_pick_lib", [
           [ "Pre-build libraries configuration", "index.html#section_emusb_device_lib_conf", null ]
         ] ],

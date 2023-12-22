@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.60.1                                *
+*       emUSB-Device version: V3.62.0                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -29,7 +29,7 @@ The source code of the emUSB Device software has been licensed to Cypress
 Semiconductor Corporation, whose registered office is 198 Champion
 Court, San Jose, CA 95134, USA including the 
 right to create and distribute the object code version of 
-the emUSB Device software for its Cortex M0, M0+ and M4 based devices.
+the emUSB Device software for its Cortex M0, M0+, M4, M33 and M55 based devices.
 The object code version can be used by Cypress customers under the 
 terms and conditions of the associated End User License Agreement.
 Support for the object code version is provided by Cypress, 
@@ -44,8 +44,8 @@ Licensed SEGGER software: emUSB-Device
 License number:           USBD-00500
 License model:            Cypress Services and License Agreement, signed November 17th/18th, 2010
                           and Amendment Number One, signed December 28th, 2020 and February 10th, 2021
-                          and Amendment Number Three, signed May 2nd, 2022 and May 5th, 2022
-Licensed platform:        Cypress devices containing ARM Cortex M cores: M0, M0+, M4
+                          and Amendment Number Three, signed May 2nd, 2022 and May 5th, 2022 and Amendment Number Four, signed August 28th, 2023
+Licensed platform:        Cypress devices containing ARM Cortex M cores: M0, M0+, M4, M33 and M55
 ----------------------------------------------------------------------
 Support and Update Agreement (SUA)
 SUA period:               2022-05-12 - 2024-05-19
@@ -60,10 +60,53 @@ Purpose     : OS Layer for the emUSB-Device. RTOS_AWARE component must be define
 
 #include "USB.h"
 
-/* Include Device specific libraries */
+/*********************************************************************
+*
+*       Set the default value for the compile time options
+*
+*********************************************************************/
+#if !defined (USBD_USE_PDL)
+#define USBD_USE_PDL                       (0U)
+#endif /* #if !defined (USBD_USE_PDL) */
+
+#if !defined (USBD_NORTOS_TICKCNT_ENABLE)
+#if defined (COMPONENT_RTOS_AWARE)
+#define USBD_NORTOS_TICKCNT_ENABLE              (0U)
+#else
+#define USBD_NORTOS_TICKCNT_ENABLE              (1U)
+#endif /* #if defined (COMPONENT_RTOS_AWARE) */
+#endif /* #if !defined USBD_NORTOS_TICKCNT_ENABLE */
+
+
+/*********************************************************************
+*
+*       Check if the combinations of the compile time options are valid
+*
+*********************************************************************/
+#if defined (COMPONENT_RTOS_AWARE) && (USBD_NORTOS_TICKCNT_ENABLE == 1U)
+#error "USBD_NORTOS_TICKCNT_ENABLE option must be always set to 0 for non-RTOS environment"
+#endif /* #if defined (COMPONENT_RTOS_AWARE) && (USBD_USE_PDL == 1U) */
+
+#if (USBD_NORTOS_TICKCNT_ENABLE == 1U) && (USBD_USE_PDL == 1U) && !defined (COMPONENT_RTOS_AWARE)
+#error "When USBD_USE_PDL is enabled in RTOS environment, the custom implementation \
+        of USB_OS_GetTickCnt() \ must be provided and USBD_NORTOS_TICKCNT_ENABLE is set to 0"
+#endif /* #if (USBD_NORTOS_TICKCNT_ENABLE == 1U) && (USBD_USE_PDL == 1U) */
+
+#if !defined (COMPONENT_CAT1A) && (USBD_USE_PDL == 1U)
+#error "USBD_USE_PDL option is applicable only for CAT1A and CAT1D device families"
+#endif /* #if defined (COMPONENT_RTOS_AWARE) && (USBD_USE_PDL == 1U) */
+
+
+/*********************************************************************
+*
+*       Include Device-specific libraries
+*
+*********************************************************************/
 #if defined (COMPONENT_CAT1A)
 #include "cy_pdl.h"
+#if (USBD_USE_PDL == 0U)
 #include "cyhal.h"
+#endif /* #if (USBD_USE_PDL == 0U) */
 #elif defined (COMPONENT_CAT3)
 #include "cybsp.h"
 #include "cy_utils.h"
@@ -71,13 +114,22 @@ Purpose     : OS Layer for the emUSB-Device. RTOS_AWARE component must be define
 #error "Unsupported Device Family"
 #endif /* #if defined (COMPONENT_CAT1A) */
 
+#if defined (COMPONENT_RTOS_AWARE)
+#include "cyabs_rtos.h"
+#endif /* #if defined (COMPONENT_RTOS_AWARE) */
+
+
+/*********************************************************************
+*
+*       Global variables
+*
+*********************************************************************/
 #define USBD_NUM_ALL_EVENTS                      (USB_NUM_EPS + USB_EXTRA_EVENTS)
 
 static uint32_t critical_section_count;
 static volatile unsigned usbd_event_transact_cnt[USBD_NUM_ALL_EVENTS];
 
 #if defined (COMPONENT_RTOS_AWARE)
-#include "cyabs_rtos.h"
 
 #define TRANSACT_CNT_EVENT_BITS_MASK            (0x1U)
 
@@ -93,9 +145,6 @@ static uint32_t mutex_num = 0U;
 
 static volatile bool usbd_event_transact_flag[USBD_NUM_ALL_EVENTS];
 
-#if !defined (USBD_NORTOS_TICKCNT_ENABLE)
-#define USBD_NORTOS_TICKCNT_ENABLE              (1U)
-#endif /* #if !defined USBD_NORTOS_TICKCNT_ENABLE */
 
 #if (USBD_NORTOS_TICKCNT_ENABLE == 1U)
 static void usbd_timer_config(void);
@@ -200,11 +249,15 @@ void USB_OS_Delay(int ms)
     (void)result;  /* To avoid the compiler warning in Release mode */
 #else /* Non-RTOS environment */
 #if defined (COMPONENT_CAT1A)
+#if (USBD_USE_PDL == 0U)
     cy_rslt_t result = cyhal_system_delay_ms((uint32_t)ms);
     CY_ASSERT(CY_RSLT_SUCCESS == result);
     (void)result;  /* To avoid the compiler warning in Release mode */
+#else
+    Cy_SysLib_Delay((uint32_t)ms);
+#endif /* #if (USBD_USE_PDL == 0U) */
 #elif defined (COMPONENT_CAT3)
-    XMC_Delay(ms);
+    XMC_Delay((uint32_t)ms);
 #endif /* #if defined (COMPONENT_CAT1A) */
 #endif /* #if defined (COMPONENT_RTOS_AWARE) */
 }
