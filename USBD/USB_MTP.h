@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2024     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.62.0                                *
+*       emUSB-Device version: V3.64.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -76,7 +76,7 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 #endif
 
 #ifndef   USB_MTP_READ_TIMEOUT
-  #define USB_MTP_PEAD_TIMEOUT      10000u  // Timeout used for read operations.
+  #define USB_MTP_READ_TIMEOUT      10000u  // Timeout used for read operations. Should be at least 100 ms.
 #endif
 
 #ifndef   MTP_MAX_NUM_STORAGES
@@ -1211,11 +1211,12 @@ typedef struct USB_MTP_INST_DATA {
   const char                * sDescription; // Human-readable string which identifies the storage.
                                             // This string is displayed in Nautilus/Windows Explorer/etc.
   const char                * sVolumeId;    // Unique volume identifier
+                                            // This field must be up to 256 characters long but only the 
+                                            // first 128 are significant and these must be unique for all 
+                                            // storages of an MTP device.
   USB_MTP_INST_DATA_DRIVER    DriverData;   // Driver data that are passed to the storage driver.
                                             // Refer to USB_MTP_INST_DATA_DRIVER for detailed information
-                                            // about how to initialize this structure. This field must be up
-                                            // to 256 characters long but only the first 128 are significant
-                                            // and these must be unique for all storages of an MTP device.
+                                            // about how to initialize this structure. 
 } USB_MTP_INST_DATA;
 
 /*********************************************************************

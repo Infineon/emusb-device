@@ -5,6 +5,7 @@ var NAVTREEINDEX0 =
 "index.html#section_emusb_device_changelog":[0,4],
 "index.html#section_emusb_device_config_cons":[0,2],
 "index.html#section_emusb_device_debug_mes_out":[0,2,1],
+"index.html#section_emusb_device_dma_cat1a":[0,2,0,4],
 "index.html#section_emusb_device_general":[0,0],
 "index.html#section_emusb_device_hw_dep_add_conf_cat3_stack":[0,2,0,3],
 "index.html#section_emusb_device_hw_dep_conf":[0,2,0],

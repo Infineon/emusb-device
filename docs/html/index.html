@@ -127,7 +127,11 @@ General Description</h1>
 <tr>
 <th>Device family</th><th>Drivers</th><th>Pointer to the driver API structure </th></tr>
 <tr>
-<td>CAT1A </td><td>Cypress PSoC 6 driver </td><td>USB_Driver_Cypress_PSoC6  </td></tr>
+<td>CAT1A </td><td>Cypress PSoC 6 driver </td><td><ul>
+<li>USB_Driver_Cypress_PSoC6</li>
+<li>USB_Driver_Cypress_PSoC6_DMA   </li>
+</ul>
+</td></tr>
 <tr>
 <td rowspan="2">CAT3 </td><td>Synopsys DWC2 driver (slave mode)  </td><td><ul>
 <li>USB_Driver_Infineon_XMC45xx</li>
@@ -791,6 +795,19 @@ CAT3 Specific Configuration</h3>
 </div><!-- fragment --> The described callback is registers into <em>USBD_SetAttachFunc()</em>. <dl class="section note"><dt>Note</dt><dd>It is recommended to enable pull-up only inside a callback registered by USBD_SetAttachFunc().</dd></dl>
 Those steps are already implemented in usbd_config.c for CAT3 devices. You can use this file as reference.</li>
 </ol>
+<h3><a class="anchor" id="section_emusb_device_dma_cat1a"></a>
+DMA driver for CAT1A device</h3>
+<p >To use the driver with DMA support:</p><ol type="1">
+<li>Add USBD_ENABLE_DMA to the DEFINE variable in Makefile</li>
+<li>Connect the USB endpoints to a DMA channel in the USB personality or do it manually using APIs for the TrigMux driver. All used data endpoints must be connected to corresponding DMA channels.</li>
+<li>Enable the DMA block before starting emUSB-Device by Cy_DMA_Enable()</li>
+<li>Add DMA USB_Driver_Cypress_PSoC6_DMA driver by USBD_AddDriver().</li>
+<li>Allocate memory for the endpoints transfer-buffer by USBD_AssignMemory().</li>
+<li>Configure DMA parameters and DMA routines by USB_DRIVER_Cypress_PSoC6_ConfigDMA()</li>
+</ol>
+<p >Steps 3-6 are implemented in the usbd_config.c file.</p>
+<p >The emUSB-Device configures a DMA channel inside the USB driver, so, no need to configure a DMA channel in the application code or in the DMA personality. Configuration of a DMA channel in the DMA personality is ignored, the enable the resource for reservation and connecting the USB endpoints to available DMA channels.</p>
+<dl class="section note"><dt>Note</dt><dd>When DMA mode is enabled in the USB personality, the USB personality generates several macros used in the usbd_config.c file.</dd></dl>
 <h2><a class="anchor" id="section_emusb_device_debug_mes_out"></a>
 Debug Message Output</h2>
 <p >The debug builds of emUSB-Device allow using the debug message outputs. The template implementation of the message output functions is in export/Config/usbd_config_io.c file. This file is automatically copied into the ModusToolbox project when emUSB-Device middleware is added for the first time by the Library manager. Otherwise, copy this file manually. By default, <a href="https://github.com/Infineon/retarget-io"><b>retarget-io</b></a> is used for the message output, but message outputs can be redefined to any suitable output way. To disable the default message outputs, set USBD_DISABLE_STANDARD_OUTPUT=1 in the DEFINES variable in the application project Makefile. To provide a custom output method in addition to setting a variable add corresponding API under the #if (USBD_DISABLE_STANDARD_OUTPUT == 1U) condition inside the _puts() function.</p>
@@ -946,7 +963,7 @@ Pre-build libraries configuration</h3>
 <tr>
 <td>Legacy Audio </td><td>1 </td><td>1  </td></tr>
 <tr>
-<td>Bulk </td><td>4 </td><td>3  </td></tr>
+<td>Bulk </td><td>4 </td><td>4  </td></tr>
 <tr>
 <td>CCID </td><td>1 </td><td>1  </td></tr>
 <tr>
@@ -962,7 +979,7 @@ Pre-build libraries configuration</h3>
 <tr>
 <td>VirtualMSD </td><td>1 </td><td>1  </td></tr>
 <tr>
-<td>VSC </td><td>Limited by USB_MAX_NUM_IF </td><td>Limited by USB_MAX_NUM_IF </td><td>Limited by USB_MAX_NUM_IF  </td></tr>
+<td>VSC </td><td>Limited by USB_MAX_NUM_IF </td><td>Limited by USB_MAX_NUM_IF  </td></tr>
 </table>
 <dl class="section note"><dt>Note</dt><dd>The MSD and MTP classes support the connection to up-to-four logical/storage units.</dd></dl>
 <h2><a class="anchor" id="section_emusb_device_use_in_rtos"></a>
@@ -1016,6 +1033,14 @@ Changelog</h1>
 <table class="doxtable">
 <tr>
 <th>Version</th><th>Changes</th><th>Reason for Change </th></tr>
+<tr>
+<td rowspan="4">1.4.0 </td><td>Add a new driver for PSoC 6 with DMA support. Now for PSoC 6, the total size of all endpoints is not limited by 512 bytes for DMA driver. </td><td>Extending the supported features for emUSB-Device middleware  </td></tr>
+<tr>
+<td>Updated the emUSB-Device stack to 3.64.1 </td><td>New version is available  </td></tr>
+<tr>
+<td>Add the props.json file </td><td>Improve the integration with the ModusToolbox 3.0+ flow  </td></tr>
+<tr>
+<td>Update usbd_config.c file for CAT3 to support OTG. OTG feature is supported in emUSB-Device and emUSB-Host middleware </td><td>Extending the supported features for emUSB-Device middleware  </td></tr>
 <tr>
 <td rowspan="6">1.3.0 </td><td>Added support of Smart Card Device Class (CCID) </td><td>Extending the supported features for emUSB-Device middleware  </td></tr>
 <tr>

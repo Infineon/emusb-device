@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2024     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.62.0                                *
+*       emUSB-Device version: V3.64.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -68,8 +68,6 @@ Purpose     : emUSB-Device configuration file for CAT3 (XMC4xxx) device
  */
 #define USBD_ISR_PRIO                           (63U)
 
-static USB_ISR_HANDLER * p_usb_isr_handler;
-
 #define USBD_CPU_DRIVER                         (0U)
 #define USBD_DYN_MEM_DRIVER                     (1U)
 #define USBD_DMA_DRIVER                         (2U)
@@ -79,6 +77,10 @@ static USB_ISR_HANDLER * p_usb_isr_handler;
 #define USBD_DRIVER                             (USBD_CPU_DRIVER)
 #endif /* #if !defined (USBD_DRIVER) */
 
+/* Disable OTG in default configuration */
+#if !defined(USBH_ENABLE_OTG)
+#define USBH_ENABLE_OTG                         (0U)
+#endif /* #if !defined(USBH_ENABLE_OTG) */
 
 #if ((USBD_DRIVER) == (USBD_DYN_MEM_DRIVER)) || ((USBD_DRIVER) == (USBD_DMA_DRIVER))
 /* Define the size of memory dedicated for drivers with DMA or
@@ -100,6 +102,13 @@ CY_SECTION("USB_RAM") __USED static uint32_t mem_pool[USBD_MEMORY_POOL_SIZE / 4U
 extern uint32_t USB_RAM_start;
 extern uint32_t USB_RAM_end;
 #endif /* #if (USBD_DRIVER) == (USBD_DYN_MEM_DRIVER) */
+
+#if (USBH_ENABLE_OTG) == 0
+static USB_ISR_HANDLER * p_usb_isr_handler;
+#else
+/* Function declaration is a part of emUSB-Host templates */
+void usb_enable_isr(IRQn_Type isr_index, USB_ISR_HANDLER * p_isr_handler, U32 isr_prio);
+#endif /* #if (USBH_ENABLE_OTG) == 0 */
 
 
 #if (USBD_DRIVER) == (USBD_DMA_DRIVER)
@@ -123,6 +132,7 @@ static int check_mem_addr(const void * pMem)
 }
 #endif /* #if (USBD_DRIVER) == (USBD_DMA_DRIVER) */
 
+#if (USBH_ENABLE_OTG) == 0
 /*********************************************************************
 *
 *       USB0_0_IRQHandler
@@ -132,7 +142,29 @@ static int check_mem_addr(const void * pMem)
 */
 void USB0_0_IRQHandler(void)
 {
-    (p_usb_isr_handler)();
+    if (p_usb_isr_handler != NULL)
+    {
+        (p_usb_isr_handler)();
+    }
+}
+#endif /* #if (USBH_ENABLE_OTG) == 0 */
+
+/*********************************************************************
+*
+*       usbd_enable_isr
+*  Function description
+*    Configure and enable interrupts.
+*
+*/
+static void usbd_enable_isr(USB_ISR_HANDLER * pfISRHandler)
+{
+#if (USBH_ENABLE_OTG) == 0
+    p_usb_isr_handler = pfISRHandler;
+    NVIC_SetPriority(USB0_0_IRQn, USBD_ISR_PRIO);
+    NVIC_EnableIRQ(USB0_0_IRQn);
+#else
+    usb_enable_isr(USB0_0_IRQn, pfISRHandler, USBD_ISR_PRIO);
+#endif /* #if (USBH_ENABLE_OTG) == 0 */
 }
 
 /*********************************************************************
@@ -146,21 +178,6 @@ static void hw_attach(void)
 {
     XMC_SCU_PCU_EnableUsbPullUp();
 }
-
-/*********************************************************************
-*
-*       enable_isr
-*  Function description
-*    Configure and enable interrupts.
-*
-*/
-static void enable_isr(USB_ISR_HANDLER * pfISRHandler)
-{
-    p_usb_isr_handler = pfISRHandler;
-    NVIC_SetPriority(USB0_0_IRQn, USBD_ISR_PRIO);
-    NVIC_EnableIRQ(USB0_0_IRQn);
-}
-
 
 /*********************************************************************
 *
@@ -189,10 +206,9 @@ void USBD_X_Config(void)
     USBD_SetCheckAddress(check_mem_addr);
 #endif /* #if (USBD_DRIVER) == (USBD_CPU_DRIVER) */
     /* Configure interrupt */
-    USBD_SetISREnableFunc(enable_isr);
+    USBD_SetISREnableFunc(usbd_enable_isr);
     USBD_SetAttachFunc(hw_attach);
 }
-
 
 /*********************************************************************
 *

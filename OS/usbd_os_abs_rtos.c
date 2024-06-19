@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2024     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.62.0                                *
+*       emUSB-Device version: V3.64.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -88,12 +88,12 @@ Purpose     : OS Layer for the emUSB-Device. RTOS_AWARE component must be define
 #endif /* #if defined (COMPONENT_RTOS_AWARE) && (USBD_USE_PDL == 1U) */
 
 #if (USBD_NORTOS_TICKCNT_ENABLE == 1U) && (USBD_USE_PDL == 1U) && !defined (COMPONENT_RTOS_AWARE)
-#error "When USBD_USE_PDL is enabled in RTOS environment, the custom implementation \
-        of USB_OS_GetTickCnt() \ must be provided and USBD_NORTOS_TICKCNT_ENABLE is set to 0"
+#error "When USBD_USE_PDL is enabled in non-RTOS environment, the custom implementation \
+        of USB_OS_GetTickCnt() must be provided and USBD_NORTOS_TICKCNT_ENABLE is set to 0"
 #endif /* #if (USBD_NORTOS_TICKCNT_ENABLE == 1U) && (USBD_USE_PDL == 1U) */
 
-#if !defined (COMPONENT_CAT1A) && (USBD_USE_PDL == 1U)
-#error "USBD_USE_PDL option is applicable only for CAT1A and CAT1D device families"
+#if !(defined (COMPONENT_CAT1A)) && (USBD_USE_PDL == 1U)
+#error "USBD_USE_PDL option is applicable only for CAT1A device families"
 #endif /* #if defined (COMPONENT_RTOS_AWARE) && (USBD_USE_PDL == 1U) */
 
 

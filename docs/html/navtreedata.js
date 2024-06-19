@@ -38,7 +38,8 @@ var NAVTREE =
           [ "USB Pins Configuration", "index.html#section_emusb_device_hw_dep_conf_pins", null ],
           [ "USB Clock Configuration", "index.html#section_emusb_device_hw_dep_conf_clock", null ],
           [ "USB Interrupt Configuration", "index.html#section_emusb_device_hw_dep_conf_int", null ],
-          [ "CAT3 Specific Configuration", "index.html#section_emusb_device_hw_dep_add_conf_cat3_stack", null ]
+          [ "CAT3 Specific Configuration", "index.html#section_emusb_device_hw_dep_add_conf_cat3_stack", null ],
+          [ "DMA driver for CAT1A device", "index.html#section_emusb_device_dma_cat1a", null ]
         ] ],
         [ "Debug Message Output", "index.html#section_emusb_device_debug_mes_out", null ],
         [ "Low Power Support", "index.html#section_emusb_device_low_power", [

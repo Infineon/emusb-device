@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2024     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.62.0                                *
+*       emUSB-Device version: V3.64.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -342,6 +342,19 @@ typedef void USBD_AC_SET_ALT_INTERFACE(unsigned InterfaceNo, unsigned NewAltSett
 
 /*********************************************************************
 *
+*       USBD_AC_GET_ALT_INTERFACE
+*
+*  Description
+*    Definition of the callback which is called when the hosts asks for the current alternate setting on an audio interface.
+*    This callback is called in interrupt context and must not block.
+*
+*  Parameters
+*    InterfaceNo  : Number of the audio streaming interface. Corresponds to the USBD_AC_INTERFACE_... defines.
+*/
+typedef void USBD_AC_GET_ALT_INTERFACE(unsigned InterfaceNo);
+
+/*********************************************************************
+*
 *       USBD_AC_STREAM_INTF_INFO
 *
 *   Description
@@ -436,6 +449,9 @@ typedef struct {
   USBD_AC_CONTROL_GET_FUNC  * pfControlGet;        // Callback function to handle audio control get requests.
   USBD_AC_CONTROL_SET_FUNC  * pfControlSet;        // Callback function to handle audio control set requests.
   USBD_AC_SET_ALT_INTERFACE * pfSetAlternate;      // Callback to inform the application about Set Interface control requests.
+#if USB_SUPPORT_GET_INTERFACE_CB
+  USBD_AC_GET_ALT_INTERFACE * pfGetInterfaceInfo;  // Callback to inform the application about Get Interface control requests.
+#endif  
   U8                          IntEP;               // Optional interrupt EP. If used, it must be allocated by calling
                                                    // USBD_AddEP(1, USB_TRANSFER_TYPE_INT, Interval, NULL, PacketSize),
                                                    // where PacketSize must be 2 for audio 1.0 devices and 6 for audio 2.0 devices.
@@ -506,7 +522,7 @@ typedef struct {
 *    The function must reinitialize the members pBuffer, NumBytes and MaxPackets before it returns.
 *    This callback is called in interrupt context and must not block. The audio data must not be processed
 *    inside this function, instead a task should be triggered that does the audio processing and this function
-*    should return as fast as possible. After this functions has returned, the next USB transfer is started
+*    should return as fast as possible. After this function has returned, the next USB transfer is started
 *    immediately. Therefore the member 'pBuffer' should be initialized to point to a different buffer to avoid
 *    overwriting the data just received (double buffering mechanism is recommended).
 *

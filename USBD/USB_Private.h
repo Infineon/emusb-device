@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2024     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.62.0                                *
+*       emUSB-Device version: V3.64.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -95,6 +95,7 @@ Purpose : Private USB include file.
 #define USB_DRIVER_CMD_CHECK_MAX_PACKET_SIZE   13
 #define USB_DRIVER_CMD_SET_ALT_PACKET_SIZE     14
 #define USB_DRIVER_CMD_SET_LPM_RESPONSE        15
+#define USB_DRIVER_CMD_LOW_POWER_RESUME        16
 
 //
 // Test Mode Selectors (USB 2.0 spec Table 9-7)
@@ -234,7 +235,10 @@ typedef struct {
 } USB_IAD_API;
 
 typedef struct {
-  USB_ON_SET_IF_FUNC     * cb;
+  union {
+    USB_ON_SET_IF_FUNC   * Set;
+    USB_ON_GET_IF_FUNC   * Get;
+  } cb;
   void                   * pContext;
 } USB_SET_INTERFACE_HOOK;
 
@@ -266,6 +270,9 @@ typedef struct _INTERFACE {
   USB_ON_CLASS_REQUEST    * pfOnClassRequest;
   USB_ON_CLASS_REQUEST    * pfOnVendorRequest;
   USB_SET_INTERFACE_HOOK    OnSetInterfaceHook;  // Contains a pointer to a callback which is called when a Set Interface command is received. Set from a class module or the application (USBD_SetOnSetInterfaceHook()).
+#if USB_SUPPORT_GET_INTERFACE_CB
+  USB_SET_INTERFACE_HOOK    OnGetInterfaceHook;  // Contains a pointer to a callback which is called when a Get Interface command is received. Set from a class module or the application (USBD_SetOnGetInterfaceHook()).
+#endif
 #if USB_SUPPORT_TRANSFER_ISO
   USB_GET_EP_CUSTOM_SIZE  * pfGetCustomMaxPacketSize;
 #endif

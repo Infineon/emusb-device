@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2024     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.62.0                                *
+*       emUSB-Device version: V3.64.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -74,7 +74,7 @@ extern "C" {     /* Make sure we have C-declarations in C++ programs */
 */
 
 /* USB system version */
-#define USB_VERSION  36200uL // Format: Mmmrr Example: 35601uL is 3.56.1
+#define USB_VERSION  36401uL // Format: Mmmrr Example: 35601uL is 3.56.1
 
 
 /*********************************************************************
@@ -484,6 +484,7 @@ typedef void         USB_DETACH_FUNC          (void);
 typedef U16          USB_ON_BCD_VERSION_FUNC  (void);
 typedef const char * USB_ON_STRING_REQUEST    (void);
 typedef void         USB_ON_SET_IF_FUNC       (U16 wIndex, U16 wValue, void * pContext);
+typedef void         USB_ON_GET_IF_FUNC       (U16 wIndex, void * pContext);
 typedef void         USB_EVENT_CALLBACK_FUNC  (unsigned Events, void * pContext);
 typedef void         USB_ATTACH_FUNC          (void);
 typedef void         USB_ENABLE_ISR_FUNC      (USB_ISR_HANDLER * pfISRHandler);
@@ -643,6 +644,7 @@ void     USBD_SetClassRequestHook       (unsigned InterfaceNum, USB_ON_CLASS_REQ
 void     USBD_SetVendorRequestHook      (unsigned InterfaceNum, USB_ON_CLASS_REQUEST * pfOnVendorRequest);
 void     USBD_SetOnSetupHook            (unsigned InterfaceNum, USB_ON_SETUP         * pfOnSetup);
 void     USBD_SetOnSetInterfaceHook     (unsigned InterfaceNum, USB_ON_SET_IF_FUNC   * pfOnSetInterface, void * pContext);
+void     USBD_SetOnGetInterfaceHook     (unsigned InterfaceNum, USB_ON_GET_IF_FUNC   * pfOnSetInterface, void * pContext);
 void     USBD_SetOnSetup                (USB_SETUP_HOOK * pHook, USB_ON_SETUP        * pfOnSetup);
 
 void     USBD_SetOnRxEP0                (USB_ON_RX_FUNC       * pfOnRx);
@@ -919,22 +921,16 @@ void USB_DRIVER_SH726A_ConfigAddr     (U32 BaseAddr);
 void USB_DRIVER_KinetisEHCI_ConfigAddr(U32 BaseAddr);
 void USB_DRIVER_iMXRT10xx_ConfigAddr  (U32 BaseAddr);
 void USB_DRIVER_Zynq7010_ConfigAddr   (U32 BaseAddr);
-void USB_DRIVER_STM32H5xx_ConfigAddr  (U32 RegBaseAddr, U32 RamBaseAddr);
 
 void USB_DRIVER_STM32F7xxHS_ConfigPHY(U8 UsePHY);
 void USB_DRIVER_STM32F4xxHS_ConfigPHY(U8 UsePHY);
-
-int USB_DRIVER_STM32L4xx_DetectChargingPort(void);
-
 void USB_DRIVER_STM32U5xx_ConfigAddr(U32 RegBaseAddr, U32 RamBaseAddr);
+void USB_DRIVER_STM32H5xx_ConfigAddr  (U32 RegBaseAddr, U32 RamBaseAddr);
 
 void USB_DRIVER_LPC546xx_Workaround(void);
 void USB_DRIVER_SYNERGYHS_ConfigPara(U16 PhySetVal, U16 BusWaitVal);
 void USB_DRIVER_SYNERGYHS_ConfigAddr(U32 BaseAddr);
 void USB_DRIVER_SYNERGYFS_ConfigAddr(U32 BaseAddr);
-
-void USB_DRIVER_Cypress_PSoC6_SysTick(void);
-void USB_DRIVER_Cypress_PSoC6_Resume(void);
 
 void USBD_DRIVER_ALIFE1_SetV2PHandler(USBD_V2P_FUNC * pfV2PHandler);
 
@@ -990,14 +986,6 @@ void USBD_DRIVER_ALIFE1_SetV2PHandler(USBD_V2P_FUNC * pfV2PHandler);
 #define USB_Driver_Renesas_RA_HS           USB_Driver_Renesas_SynergyHS
 #define USB_Driver_Atmel_SAM9X35           USB_Driver_Atmel_SAM9X25
 #define USB_Driver_Atmel_SAMA5Dx           USB_Driver_Atmel_SAMA5D3x
-#define USB_Driver_ST_STM32                USB_Driver_ST_STM32x32
-#define USB_Driver_ST_STM32F3xx6           USB_Driver_ST_STM32x16
-#define USB_Driver_ST_STM32F3xx8           USB_Driver_ST_STM32x16
-#define USB_Driver_ST_STM32F3xxB           USB_Driver_ST_STM32x32
-#define USB_Driver_ST_STM32F3xxC           USB_Driver_ST_STM32x32
-#define USB_Driver_ST_STM32F3xxD           USB_Driver_ST_STM32x16
-#define USB_Driver_ST_STM32F3xxE           USB_Driver_ST_STM32x16
-#define USB_Driver_ST_STM32F0              USB_Driver_ST_STM32F0xx
 #define USB_Driver_Freescale_K40           USB_Driver_Freescale_KHCI
 #define USB_Driver_Freescale_K60           USB_Driver_Freescale_KHCI
 #define USB_Driver_Freescale_K70           USB_Driver_Freescale_KHCI
@@ -1037,8 +1025,6 @@ extern const USB_HW_DRIVER USB_Driver_Atmel_SAMA5D4x;
 extern const USB_HW_DRIVER USB_Driver_Atmel_SAMV7;
 extern const USB_HW_DRIVER USB_Driver_Atmel_SAMD21;
 extern const USB_HW_DRIVER USB_Driver_Atmel_SAMD51;
-extern const USB_HW_DRIVER USB_Driver_Cypress_PSoC6;
-extern const USB_HW_DRIVER USB_Driver_Cypress_PSoC6_DMA;
 extern const USB_HW_DRIVER USB_Driver_Cypress_MB9BFxxx;
 extern const USB_HW_DRIVER USB_Driver_EM_EFM32GG990;
 extern const USB_HW_DRIVER USB_Driver_Freescale_KHCI;
@@ -1082,10 +1068,6 @@ extern const USB_HW_DRIVER USB_Driver_Renesas_SynergyS1;
 extern const USB_HW_DRIVER USB_Driver_Renesas_SynergyFS;
 extern const USB_HW_DRIVER USB_Driver_Renesas_SynergyHS;
 extern const USB_HW_DRIVER USB_Driver_Renesas_R8A66597;
-extern const USB_HW_DRIVER USB_Driver_ST_STM32x32;
-extern const USB_HW_DRIVER USB_Driver_ST_STM32x16;
-extern const USB_HW_DRIVER USB_Driver_ST_STM32F107;
-extern const USB_HW_DRIVER USB_Driver_ST_STM32F0xx;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32F4xxFS;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32F4xxHS;
 extern const USB_HW_DRIVER USB_Driver_ST_STM32F4xxHS_DMA;

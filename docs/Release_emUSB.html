@@ -4,7 +4,7 @@
 
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  <title>Release notes for emUSB-Device V3.62.0         </title>
+  <title>Release notes for emUSB-Device V3.64.1         </title>
   <meta name="robots" content="noindex,nofollow">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <style type="text/css">
@@ -208,7 +208,7 @@
         <div class="claim">The Embedded Experts</div>
         <div class="head">
           <div class="container">
-            <h1>Release notes for emUSB-Device V3.62.0         </h1>
+            <h1>Release notes for emUSB-Device V3.64.1         </h1>
           </div>
         </div>
       </div>
@@ -216,6 +216,42 @@
     <!-- ****************************************************************** -->
     <!-- History                                                            -->
     <!-- ****************************************************************** -->
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.64.1 [10. Apr 2024]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>PSoC6 driver now supports DMA.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>MTP: Error codes improved and warning messages added.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+    <div class="divider-global">
+      <div class="container">
+        <h2>Version 3.64.0 [13. Feb 2024]</h2>
+        <div>
+          <h3>New Features</h3>
+          <ol>
+            <li>New C++ host API to access vendor USB devices (USBVAPI).</li>
+            <li>Support a user callback for the 'Get Interface' control request.</li>
+          </ol>
+          <h3>Improvements</h3>
+          <ol>
+            <li>MTP: When using BigFat and transferring files larger than 4GB it was possible that the PC will run into a timeout because since we do not know the actual file size in this case we would wait for the complete USB_MTP_READ_TIMEOUT to be over. With the default 10s timeout some PC operating systems would assume an error occurred. The issue has been resolved by reading single packets once the 4GB limit has been exceeded.</li>
+          </ol>
+          <h3>Program corrections</h3>
+          <ol>
+            <li>STM32U545/STM32H5xx driver: Due to a race condition in the USB controller hardware received packets may be corrupt. Workaround implemented.</li>
+            <li>USB BULK API: Calling USBBULK_Exit while inserting a new USB device could cause a NULL pointer exception. Fixed.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
     <div class="divider-global">
       <div class="container">
         <h2>Version 3.62.0 [21. Nov 2023]</h2>
@@ -1886,7 +1922,7 @@
   <div class="footer">
     <div class="container">
       <div>
-        <p>Copyright 2001-2023 SEGGER Microcontroller GmbH. All rights reserved.<br> For more information, please visit our website&nbsp;<a href="https://www.segger.com/" target="_blank">www.segger.com</a>&nbsp;or contact us via&nbsp;<a href="https://www.segger.com/ticket"
+        <p>Copyright 2001-2024 SEGGER Microcontroller GmbH. All rights reserved.<br> For more information, please visit our website&nbsp;<a href="https://www.segger.com/" target="_blank">www.segger.com</a>&nbsp;or contact us via&nbsp;<a href="https://www.segger.com/ticket"
             target="_blank">www.segger.com/ticket</a>&nbsp;</p>
       </div>
     </div>

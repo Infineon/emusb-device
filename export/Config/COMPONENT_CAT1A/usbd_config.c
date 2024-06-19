@@ -3,7 +3,7 @@
 *                        The Embedded Experts                        *
 **********************************************************************
 *                                                                    *
-*       (c) 2003 - 2023     SEGGER Microcontroller GmbH              *
+*       (c) 2003 - 2024     SEGGER Microcontroller GmbH              *
 *                                                                    *
 *       www.segger.com     Support: www.segger.com/ticket            *
 *                                                                    *
@@ -17,7 +17,7 @@
 *                                                                    *
 **********************************************************************
 *                                                                    *
-*       emUSB-Device version: V3.62.0                                *
+*       emUSB-Device version: V3.64.1                                *
 *                                                                    *
 **********************************************************************
 ----------------------------------------------------------------------
@@ -57,6 +57,8 @@ Purpose     : emUSB-Device configuration file for CAT1A device
 */
 
 #include "USB.h"
+#include "USB_HW_Cypress_PSoC6.h"
+#include "cybsp.h"
 #if defined (USBD_USE_PDL) && (USBD_USE_PDL == 1U)
 #include "cy_pdl.h"
 #else
@@ -65,6 +67,11 @@ Purpose     : emUSB-Device configuration file for CAT1A device
 
 /* Define interrupt priority */
 #define USBD_ISR_PRIO                           (3U)
+
+/*  Use the driver with DMA support. Can be defined in Makefile */
+#if !defined (USBD_ENABLE_DMA)
+#define USBD_ENABLE_DMA                         (false)
+#endif /* #if !defined (USBD_ENABLE_DMA) */
 
 /* Define interrupt source */
 #if (COMPONENT_CM0P)
@@ -75,6 +82,19 @@ Purpose     : emUSB-Device configuration file for CAT1A device
 #else
 #define USBD_INTERRUPT_NUM                      (usb_interrupt_med_IRQn)
 #endif /* #if (COMPONENT_CM0P) */
+
+#if USBD_ENABLE_DMA == true
+
+/* Define the size of memory dedicated for drivers with DMA in
+ * bytes. The memory is used for endpoints buffers and
+ * transfer descriptors. Update this value with the optimal
+ * memory pool size (strongly recommended) for the application.
+ * For details on selecting the optimal memory pool size, refer
+ * to the USBD_AssignMemory() description in emUSB-Device User
+ * Guide & Reference Manual.
+ */
+#define USBD_MEMORY_POOL_SIZE                   (2048U)
+#endif /* #if USBD_ENABLE_DMA == true */
 
 
 /*********************************************************************
@@ -111,6 +131,107 @@ static void enable_isr(USB_ISR_HANDLER * pfISRHandler)
     NVIC_EnableIRQ(USBD_INTERRUPT_NUM);
 }
 
+#if USBD_ENABLE_DMA == true
+/*********************************************************************
+*
+*       trig_mux_sw_trigger
+*
+*  Function description
+*    Triggers the burst end on an endpoint.
+*
+*  Parameters
+*    Endpoint      -  Endpoint number 0..7
+*
+*/
+static void trig_mux_sw_trigger(unsigned Endpoint)
+{
+    uint32_t out_trig_mux = 0U;
+    switch(Endpoint)
+    {
+#if defined (USBD_DMA_OUT_TRIG_MUX_EP0)
+        case 0U:
+            out_trig_mux = USBD_DMA_OUT_TRIG_MUX_EP0;
+            break;
+#endif /* #if defined (USBD_DMA_OUT_TRIG_MUX_EP0) */
+#if defined (USBD_DMA_OUT_TRIG_MUX_EP1)
+        case 1U:
+            out_trig_mux = USBD_DMA_OUT_TRIG_MUX_EP1;
+            break;
+#endif /* #if defined (USBD_DMA_OUT_TRIG_MUX_EP1) */
+#if defined (USBD_DMA_OUT_TRIG_MUX_EP2)
+        case 2U:
+            out_trig_mux = USBD_DMA_OUT_TRIG_MUX_EP2;
+            break;
+#endif /* #if defined (USBD_DMA_OUT_TRIG_MUX_EP2) */
+#if defined (USBD_DMA_OUT_TRIG_MUX_EP3)
+        case 3U:
+            out_trig_mux = USBD_DMA_OUT_TRIG_MUX_EP3;
+            break;
+#endif /* #if defined (USBD_DMA_OUT_TRIG_MUX_EP3) */
+#if defined (USBD_DMA_OUT_TRIG_MUX_EP4)
+        case 4U:
+            out_trig_mux = USBD_DMA_OUT_TRIG_MUX_EP4;
+            break;
+#endif /* #if defined (USBD_DMA_OUT_TRIG_MUX_EP4) */
+#if defined (USBD_DMA_OUT_TRIG_MUX_EP5)
+        case 5U:
+            out_trig_mux = USBD_DMA_OUT_TRIG_MUX_EP5;
+            break;
+#endif /* #if defined (USBD_DMA_OUT_TRIG_MUX_EP5) */
+#if defined (USBD_DMA_OUT_TRIG_MUX_EP6)
+        case 6U:
+            out_trig_mux = USBD_DMA_OUT_TRIG_MUX_EP6;
+            break;
+#endif /* #if defined (USBD_DMA_OUT_TRIG_MUX_EP6) */
+#if defined (USBD_DMA_OUT_TRIG_MUX_EP7)
+        case 7U:
+            out_trig_mux = USBD_DMA_OUT_TRIG_MUX_EP7;
+            break;
+#endif /* #if defined (USBD_DMA_OUT_TRIG_MUX_EP7) */
+        default:
+            /* Never go to this */
+            USB_OS_Panic("Incorrect SW trigger signal for DMA channel");
+            break;
+    }
+    (void)Cy_TrigMux_SwTrigger(out_trig_mux, CY_TRIGGER_TWO_CYCLES);
+}
+
+/* DMA configuration */
+static const USB_CYPRESS_PSoC6_DMA_CONFIG dma_config =
+{
+    trig_mux_sw_trigger,
+    {
+#if defined (USBD_DMA_CHANNEL_ADDRESS_EP0) && defined (USBD_DMA_CHANNEL_PRIORITY_EP0)
+        { USBD_DMA_CHANNEL_ADDRESS_EP0, USBD_DMA_CHANNEL_PRIORITY_EP0 },
+#endif /* #if defined (USBD_DMA_CHANNEL_ADDRESS_EP0) && defined (USBD_DMA_CHANNEL_PRIORITY_EP0) */
+#if defined (USBD_DMA_CHANNEL_ADDRESS_EP1) && defined (USBD_DMA_CHANNEL_PRIORITY_EP1)
+        { USBD_DMA_CHANNEL_ADDRESS_EP1, USBD_DMA_CHANNEL_PRIORITY_EP1 },
+#endif /* #if defined (USBD_DMA_CHANNEL_ADDRESS_EP1) && defined (USBD_DMA_CHANNEL_PRIORITY_EP1) */
+#if defined (USBD_DMA_CHANNEL_ADDRESS_EP2) && defined (USBD_DMA_CHANNEL_PRIORITY_EP2)
+        { USBD_DMA_CHANNEL_ADDRESS_EP2, USBD_DMA_CHANNEL_PRIORITY_EP2 },
+#endif /* #if defined (USBD_DMA_CHANNEL_ADDRESS_EP2) && defined (USBD_DMA_CHANNEL_PRIORITY_EP2) */
+#if defined (USBD_DMA_CHANNEL_ADDRESS_EP3) && defined (USBD_DMA_CHANNEL_PRIORITY_EP3)
+        { USBD_DMA_CHANNEL_ADDRESS_EP3, USBD_DMA_CHANNEL_PRIORITY_EP3 },
+#endif /* #if defined (USBD_DMA_CHANNEL_ADDRESS_EP3) && defined (USBD_DMA_CHANNEL_PRIORITY_EP3) */
+#if defined (USBD_DMA_CHANNEL_ADDRESS_EP4) && defined (USBD_DMA_CHANNEL_PRIORITY_EP4)
+        { USBD_DMA_CHANNEL_ADDRESS_EP4, USBD_DMA_CHANNEL_PRIORITY_EP4 },
+#endif /* #if defined (USBD_DMA_CHANNEL_ADDRESS_EP4) && defined (USBD_DMA_CHANNEL_PRIORITY_EP4) */
+#if defined (USBD_DMA_CHANNEL_ADDRESS_EP5) && defined (USBD_DMA_CHANNEL_PRIORITY_EP5)
+        { USBD_DMA_CHANNEL_ADDRESS_EP5, USBD_DMA_CHANNEL_PRIORITY_EP5 },
+#endif /* #if defined (USBD_DMA_CHANNEL_ADDRESS_EP5) && defined (USBD_DMA_CHANNEL_PRIORITY_EP5) */
+#if defined (USBD_DMA_CHANNEL_ADDRESS_EP6) && defined (USBD_DMA_CHANNEL_PRIORITY_EP6)
+        { USBD_DMA_CHANNEL_ADDRESS_EP6, USBD_DMA_CHANNEL_PRIORITY_EP6 },
+#endif /* #if defined (USBD_DMA_CHANNEL_ADDRESS_EP6) && defined (USBD_DMA_CHANNEL_PRIORITY_EP6) */
+#if defined (USBD_DMA_CHANNEL_ADDRESS_EP7) && defined (USBD_DMA_CHANNEL_PRIORITY_EP7)
+        { USBD_DMA_CHANNEL_ADDRESS_EP7, USBD_DMA_CHANNEL_PRIORITY_EP7 },
+#endif /* #if defined (USBD_DMA_CHANNEL_ADDRESS_EP7) && defined (USBD_DMA_CHANNEL_PRIORITY_EP7) */
+    }
+};
+
+static U32 ep_mem_pool_dma[USBD_MEMORY_POOL_SIZE / 4U];
+
+#endif /* #if USBD_ENABLE_DMA == true */
+
 /*********************************************************************
 *
 *       USBD_X_Config
@@ -122,8 +243,18 @@ static void enable_isr(USB_ISR_HANDLER * pfISRHandler)
 */
 void USBD_X_Config(void)
 {
+#if USBD_ENABLE_DMA == true
+    /* Enable the DMA IP block */
+    Cy_DMA_Enable(DW0);
+
+    /* Add and configure DMA driver */
+    USBD_AddDriver(&USB_Driver_Cypress_PSoC6_DMA);
+    USBD_AssignMemory(ep_mem_pool_dma, sizeof(ep_mem_pool_dma));
+    USB_DRIVER_Cypress_PSoC6_ConfigDMA(&USB_DRIVER_Cypress_PSoC6_DWx, &dma_config);
+#else
     /* Add USB Driver */
     USBD_AddDriver(&USB_Driver_Cypress_PSoC6);
+#endif /* #if USBD_ENABLE_DMA == true */
     /* Configure interrupt */
     USBD_SetISREnableFunc(enable_isr);
 }
